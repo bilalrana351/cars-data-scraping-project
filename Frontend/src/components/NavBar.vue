@@ -1,6 +1,6 @@
 <template>
   <v-app-bar class="container" :elevation="2">
-    <v-app-bar-title>Car Scraping Project</v-app-bar-title>
+    <v-app-bar-title>Cars Scraping Project</v-app-bar-title>
     <v-spacer></v-spacer>
     <div class="data">Page 01</div>
     <v-menu>
@@ -31,7 +31,9 @@ const props = defineProps({});
 const items = [
   {
     title: "Reload Page",
-    onClick: () => {},
+    onClick: () => {
+      router.go(0);
+    },
     icon: "mdi-restart",
   },
 ];

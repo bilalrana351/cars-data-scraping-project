@@ -1,12 +1,7 @@
 <template>
   <main>
     <Navbar />
-    <div>
-      <p>Make: {{ params.make }}</p>
-      <p>Model: {{ params.model }}</p>
-      <p>Distance: {{ params.distance }}</p>
-      <p>Zip: {{ params.zip }}</p>
-    </div>
+    <Loader />
   </main>
 </template>
 
