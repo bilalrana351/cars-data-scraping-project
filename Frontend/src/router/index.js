@@ -5,6 +5,7 @@ const routes = [
   {
     path: "/",
     component: Index,
+    props: true,
   },
   {
     path: "/:pathMatch(.*)*",
