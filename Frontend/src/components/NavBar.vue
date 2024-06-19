@@ -1,24 +1,28 @@
 <template>
   <v-app-bar class="container" :elevation="2">
-    <v-app-bar-title>Cars Scraping Project</v-app-bar-title>
-    <v-spacer></v-spacer>
-    <div class="data">Page 01</div>
-    <v-menu>
-      <template v-slot:activator="{ props }">
-        <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
-      </template>
-      <v-list class="list">
-        <v-btn
-          :prepend-icon="item.icon"
-          @click="item.onClick"
-          v-for="(item, i) in items"
-          :key="i"
-          class="button"
-          variant="text"
-          >{{ item.title }}
-        </v-btn>
-      </v-list>
-    </v-menu>
+    <div class="box">
+      <div class="holder">
+        <div class="data">Cars Scraping Project</div>
+        <v-spacer></v-spacer>
+        <div class="data data2">Page 01</div>
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
+          </template>
+          <v-list class="list">
+            <v-btn
+              :prepend-icon="item.icon"
+              @click="item.onClick"
+              v-for="(item, i) in items"
+              :key="i"
+              class="button"
+              variant="text"
+              >{{ item.title }}
+            </v-btn>
+          </v-list>
+        </v-menu>
+      </div>
+    </div>
   </v-app-bar>
 </template>
 
@@ -47,6 +51,13 @@ const items = [
   border: none !important;
 }
 
+.box {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0 20px;
+}
+
 .list {
   display: flex;
   flex-direction: column;
@@ -70,8 +81,19 @@ const items = [
   text-overflow: ellipsis;
 }
 
+.holder {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
 @media screen and (max-width: 600px) {
   .shifticon {
+    display: none;
+  }
+
+  .data2 {
     display: none;
   }
 }
