@@ -21,4 +21,4 @@ Frontend/*.njsproj
 Frontend/*.sln
 Frontend/*.sw?
 
-Backend/__pycache__
+Backend/__pycache__*
