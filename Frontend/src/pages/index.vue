@@ -94,7 +94,9 @@ const params = reactive({
 watch(make, (value) => {
   const filter = filters.find((f) => f.make === value);
   currentModels.value = filter ? filter.models : [];
-  model.value = "All Models";
+  if (!params.model) {
+    model.value = "All Models";
+  }
 });
 
 onMounted(() => {
@@ -150,10 +152,10 @@ onMounted(() => {
       (m) => m.toLowerCase() === lowerCaseModel
     );
 
-    if (foundModel) {
+    if (foundModel !== undefined) {
       model.value = foundModel;
     } else {
-      model.value = "All Models";
+      model.value = "All Mode2ls";
     }
   } else {
     model.value = null;
