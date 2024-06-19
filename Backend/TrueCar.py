@@ -4,6 +4,7 @@ import requests
 from Headers import getHeader
 from bs4 import BeautifulSoup
 import Helpers
+import validators
 
 # At the start we will start from the page 1
 pageNumber = 1
@@ -93,7 +94,6 @@ def scrapInfo(html,lastPage):
       className = listing['class']  
       className = " ".join(className)
       if (className == "mx-1 mt-3 w-full md:hidden"):
-          print("We are here")
           continue
       # We will append to the info array
       info.append(scrapCard(listing))
@@ -101,12 +101,33 @@ def scrapInfo(html,lastPage):
     return []
 
 def scrapCard(card):
-    return {
-        "imageUrl": scrapImageUrl(card),
-        "description": scrapDescription(card),
-        "price": scrapPrice(card),
-        "mainLink": scrapMainLink(card)
-    }
+    # return {
+    #     "imageUrl": scrapImageUrl(card),
+    #     "description": scrapDescription(card),
+    #     "price": scrapPrice(card),
+    #     "mainLink": scrapMainLink(card)
+    # }
+    print(scrapImageUrl(card))
+
+def scrapImageUrl(card):
+    try:
+        # We will find the image block like this
+        imageBlock = card.find("img",class_="img-inner img-block")['src']
+        if (validators.url(imageBlock) == True):
+            return imageBlock
+        else:
+            imageBlock = card.find("img",class_="img-inner img-block")['data-original']
+            if(validators.url(imageBlock)==True):
+                return imageBlock
+            else:
+                imageBlock = card.find("img",class_="img-inner img-block")['data-original']
+                if(validators.url(imageBlock) == True):
+                    return imageBlock
+                else:
+                    return "Image not found"
+    except Exception as e:
+        print(e)
+        return "Image not found"
 
 def getInitialAddress(yearMin,yearMax,make,model,trim,zip,radius):
     global pageNumber
