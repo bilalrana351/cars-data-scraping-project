@@ -17,6 +17,7 @@ def cars():
         make = None
         model = None
         distance = None
+        amount = 20
         zip = None
 
         if "make" in body:
@@ -29,9 +30,11 @@ def cars():
             distance = body["distance"]
         if "zip" in body:
             zip = body["zip"]
+        if "amount" in body:
+            amount = body["amount"]
 
         print(make,model,distance,zip)
-        x = scrapCars(make=make,model=model,zip=zip,radius=distance,recordsNumber=15,newRequest=True)
+        x = scrapCars(make=make,model=model,zip=zip,radius=distance,recordsNumber=amount,newRequest=True)
         return jsonify({"status": 200, "message": "Data Recieved!", "data": x})
     except Exception as e:
         print(e)

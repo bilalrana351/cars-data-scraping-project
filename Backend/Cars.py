@@ -172,6 +172,9 @@ def findImage(card):
     link = None
     for vehicleImage in vehicleImages:
         supposedLink = vehicleImage['src']
+
+        if "data:image" in supposedLink:
+            supposedLink = vehicleImage['data-src']
         # Check if the supposed link is a valid url
         try:
             if (validators.url(supposedLink)):
@@ -186,6 +189,8 @@ def findImage(card):
         for vehicleImage in vehicleImages:
             supposedLink = vehicleImage['data-src']
             try:
+                if "data:image" in supposedLink:
+                    supposedLink = vehicleImage['src']
                 if (validators.url(supposedLink)):
                     link = supposedLink
                     break
