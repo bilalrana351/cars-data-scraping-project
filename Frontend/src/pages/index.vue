@@ -11,42 +11,42 @@
       <div class="card-heading">Filter</div>
       <div class="grid-filter">
         <v-responsive class="text">
-          <v-select
+          <v-autocomplete
             label="Make"
             id="make"
-            :items="['All', 'Mess', 'Cleaner', 'CareTaker']"
+            :items="currentMakes"
             variant="outlined"
             color="red darken 3"
             v-model="make"
-          ></v-select>
+          ></v-autocomplete>
         </v-responsive>
         <v-responsive class="text">
-          <v-select
+          <v-autocomplete
             label="Model"
             id="model"
-            :items="['All', 'Mess', 'Cleaner', 'CareTaker']"
+            :items="currentModels"
             variant="outlined"
             color="red darken 3"
             v-model="model"
-          ></v-select>
+          ></v-autocomplete>
         </v-responsive>
         <v-responsive class="text">
-          <v-select
+          <v-autocomplete
             label="Distance"
             id="distance"
-            :items="['All', 'Mess', 'Cleaner', 'CareTaker']"
+            :items="currentDistances"
             variant="outlined"
             color="red darken 3"
             v-model="distance"
-          ></v-select>
+          ></v-autocomplete>
         </v-responsive>
         <v-responsive class="text">
           <v-text-field
             label="Zip"
             id="zip"
-            :items="['All', 'Mess', 'Cleaner', 'CareTaker']"
             variant="outlined"
             v-model="zip"
+            type="number"
             color="red darken 3"
           ></v-text-field>
         </v-responsive>
@@ -64,6 +64,7 @@
 <script setup>
 import Navbar from "../components/NavBar.vue";
 import { defineProps, watch, onMounted, reactive, ref } from "vue";
+import { filters, distances } from "../filters";
 
 const url = new URL(window.location.href);
 const loading = ref(false);
@@ -72,11 +73,91 @@ const model = ref(null);
 const distance = ref(null);
 const zip = ref(null);
 
+const currentModels = ref([]);
+const currentMakes = ref([]);
+const currentDistances = ref([]);
+
+const zipCodeRegex =
+  /^(?:\d{5}(?:-\d{4})?|[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d|(?:[A-Za-z]{1,2}\d[A-Za-z\d]? \d[A-Za-z]{2}|GIR 0AA))$/;
+
+function validateZipCode(zipCode) {
+  return zipCodeRegex.test(zipCode);
+}
+
 const params = reactive({
   make: url.searchParams.get("make"),
   model: url.searchParams.get("model"),
   distance: url.searchParams.get("distance"),
   zip: url.searchParams.get("zip"),
+});
+
+watch(make, (value) => {
+  const filter = filters.find((f) => f.make === value);
+  currentModels.value = filter ? filter.models : [];
+  model.value = "All Models";
+});
+
+onMounted(() => {
+  currentMakes.value = filters.map((f) => f.make);
+  let temp = distances.map((d) => d + " Miles");
+  currentDistances.value = ["All Distances", ...temp];
+
+  if (params.make) {
+    const lowerCaseMake = params.make.toLowerCase();
+    const foundMake = currentMakes.value.find(
+      (m) => m.toLowerCase() === lowerCaseMake
+    );
+
+    if (foundMake) {
+      make.value = foundMake;
+      currentModels.value = filters.find((f) => f.make === foundMake).models;
+    } else {
+      make.value = null;
+    }
+  } else {
+    make.value = null;
+  }
+
+  if (params.distance) {
+    const lowerCaseDistance = params.distance;
+    const foundDistance = currentDistances.value.find((d) =>
+      d.includes(lowerCaseDistance)
+    );
+
+    if (foundDistance) {
+      distance.value = foundDistance;
+    } else {
+      distance.value = "All Distances";
+    }
+  } else {
+    distance.value = null;
+  }
+
+  if (params.zip) {
+    const zipCode = params.zip;
+    if (validateZipCode(zipCode)) {
+      zip.value = zipCode;
+    } else {
+      zip.value = null;
+    }
+  } else {
+    zip.value = null;
+  }
+
+  if (params.model && make.value) {
+    const lowerCaseModel = params.model.toLowerCase();
+    const foundModel = currentModels.value.find(
+      (m) => m.toLowerCase() === lowerCaseModel
+    );
+
+    if (foundModel) {
+      model.value = foundModel;
+    } else {
+      model.value = "All Models";
+    }
+  } else {
+    model.value = null;
+  }
 });
 </script>
 
@@ -144,10 +225,14 @@ main {
 }
 
 .button {
-  background-color: var(--primary);
+  background-color: var(--primary-dark);
   color: white;
   height: 40px !important;
   width: 100%;
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: 0px;
+  font-size: 16px;
   max-width: 160px;
 }
 
