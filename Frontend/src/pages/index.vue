@@ -225,7 +225,7 @@ main {
 }
 
 .button {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-mid);
   color: white;
   height: 40px !important;
   width: 100%;
