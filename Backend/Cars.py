@@ -201,7 +201,7 @@ def findDetails(card):
 
     try:
         # To get the description
-        return vehicleDetail.find('h2',class_='title')
+        return vehicleDetail.find('h2',class_='title').text
     except:
         return "Details not Found"
 

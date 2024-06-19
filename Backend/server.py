@@ -32,7 +32,7 @@ def cars():
 
         print(make,model,distance,zip)
         x = scrapCars(make=make,model=model,zip=zip,radius=distance,recordsNumber=15,newRequest=True)
-        return jsonify({"status": 200, "message": "Data Recieved!", "data": "Will be Validated"})
+        return jsonify({"status": 200, "message": "Data Recieved!", "data": x})
     except Exception as e:
         print(e)
         return jsonify({"status": 500, "message": "Internal Server Error!"})
