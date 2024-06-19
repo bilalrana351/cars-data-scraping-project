@@ -1,15 +1,21 @@
+import Index from "../pages/index.vue";
+import { createRouter, createWebHistory } from "vue-router";
 
-/**
- * router/index.ts
- *
- * Automatic routes for `./src/pages/*.vue`
- */
-
-// Composables
-import { createRouter, createWebHistory } from 'vue-router/auto'
+const routes = [
+  {
+    path: "/",
+    component: Index,
+    props: true,
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/welcome",
+  },
+];
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-})
+  history: createWebHistory(),
+  routes,
+});
 
-export default router
+export default router;

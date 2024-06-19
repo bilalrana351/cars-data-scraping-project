@@ -1,0 +1,6 @@
+Flask-Cors==4.0.0
+Flask==3.0.2
+bs4==0.0.2
+beautifulsoup==4.12.3
+requests==2.31.0
+validators==0.28.3

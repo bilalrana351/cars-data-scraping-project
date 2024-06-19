@@ -4,7 +4,10 @@ import requests
 from Headers import getHeader
 from bs4 import BeautifulSoup
 import Helpers
+<<<<<<< HEAD
 import validators
+=======
+>>>>>>> 5ba8946c064d57f995587e2d11210d470d43df0f
 
 # At the start we will start from the page 1
 pageNumber = 1
@@ -94,6 +97,10 @@ def scrapInfo(html,lastPage):
       className = listing['class']  
       className = " ".join(className)
       if (className == "mx-1 mt-3 w-full md:hidden"):
+<<<<<<< HEAD
+=======
+          print("We are here")
+>>>>>>> 5ba8946c064d57f995587e2d11210d470d43df0f
           continue
       # We will append to the info array
       info.append(scrapCard(listing))
@@ -101,6 +108,7 @@ def scrapInfo(html,lastPage):
     return []
 
 def scrapCard(card):
+<<<<<<< HEAD
     # return {
     #     "imageUrl": scrapImageUrl(card),
     #     "description": scrapDescription(card),
@@ -128,6 +136,14 @@ def scrapImageUrl(card):
     except Exception as e:
         print(e)
         return "Image not found"
+=======
+    return {
+        "imageUrl": scrapImageUrl(card),
+        "description": scrapDescription(card),
+        "price": scrapPrice(card),
+        "mainLink": scrapMainLink(card)
+    }
+>>>>>>> 5ba8946c064d57f995587e2d11210d470d43df0f
 
 def getInitialAddress(yearMin,yearMax,make,model,trim,zip,radius):
     global pageNumber
