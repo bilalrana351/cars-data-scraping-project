@@ -26,3 +26,6 @@ def areNewRecordsNeeded(current,pageCapacity):
         return True
     else:
         return False
+    
+if __name__ == "__main__":
+    raise Exception("This file is not meant to run by itself")

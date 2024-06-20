@@ -6,17 +6,24 @@ from bs4 import BeautifulSoup
 import Helpers
 import validators
 from requests_html import HTMLSession
+import json
 
 recordsInAPage = 30
 
+maxPages = 1
+
 # This site gives a maximum of 30 records per page
-def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,recordsNumber=None,newRequest=False,):
+def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
     global recordsInAPage
+    global maxPages
 
     # If it is a new request we will reset the page number
     if newRequest:
         pass
     
+    if (pageNumber > maxPages):
+        return []
+
     # Get the spaces in the makes, models, and trims convert to - for the url
 
     # This all is input preprocessing
@@ -27,26 +34,67 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius)
 
-    print(initialAddress)
+    response = requests.get(initialAddress)
 
-    # session = HTMLSession()
+    soup = BeautifulSoup(response.text,'html.parser')
 
-    # response = session.get(initialAddress)
-
-    # response.html.render()
-
-    # soup = BeautifulSoup(response.html.html,'html.parser')
-
-    # if newRequest:
+    imagesInfo = findAllImagesUrl(soup)
 
 
-    # info = scrapInfo(soup,False)
-    # # At the end we will increment the current record
-    # currentRecords += recordsNumber
+    if newRequest:
+        maxPages = findTotalRecords(soup)
 
-    # pageNumber += 1
 
-    # return info
+    info = scrapInfo(soup,imagesInfo,False)
+
+    return info
+
+def findTotalRecords(html):
+    try:
+        mainDiv = html.find("div",class_ = "flex items-center justify-between")
+        mainSpan = mainDiv.find("span",class_ = "hidden-md-up")
+        content = mainSpan.text
+        content = content.split(" ")[0]
+        return int(content.replace(",",""))
+    except Exception as e:
+        print(e)
+        return 0 
+
+def scrapMileage(html):
+    try:
+        mileageDiv =  html.find("div",{"data-test":"vehicleMileage"})
+        mileage = mileageDiv.text
+        mileage = mileage.replace("k","000")
+        mileage = mileage.replace("K","000")
+        mileage = mileage.replace("mi","")
+        mileage = mileage.replace("Miles","")
+        mileage = mileage.replace(" ","")
+        return int(mileage)
+    except Exception as e:
+        print(e)
+        return "Mileage not found"
+
+def findAllImagesUrl(html):
+    scriptTags = html.find("script",id="__NEXT_DATA__")
+
+    tag = json.loads(scriptTags.text)
+
+    tag = tag['props']
+
+    tag = tag['pageProps']
+
+    tag = tag['__APOLLO_STATE__']
+    
+    allInfo = []
+
+    for i,scriptTags in enumerate(tag):
+        if ("listing" not in scriptTags.lower()):
+            continue
+        allInfo.append(tag[scriptTags])
+    
+    return allInfo
+    
+
 
 def replaceSpaces(model,make,trim):
     # In all the makes models and trims we will replace space with -
@@ -64,7 +112,7 @@ def replaceSpaces(model,make,trim):
         trim = trim.replace(" ","-").lower()
     return [model,make,trim]
     
-def scrapInfo(html,lastPage):
+def scrapInfo(html,imagesInfo,lastPage):
     allListings = html.find("ul","row mb-3 mt-1").children
 
     info = []
@@ -74,42 +122,61 @@ def scrapInfo(html,lastPage):
       className = " ".join(className)
       if (className == "mx-1 mt-3 w-full md:hidden"):
           continue
+      infoScraped = scrapCard(listing,imagesInfo)
       # We will append to the info array
-      info.append(scrapCard(listing))
+      info.append(infoScraped)
       
-    return []
+    return info
 
-def scrapCard(card):
-    # return {
-    #     "imageUrl": scrapImageUrl(card),
-    #     "description": scrapDescription(card),
-    #     "price": scrapPrice(card),
-    #     "mainLink": scrapMainLink(card)
-    # }
-    print(scrapImageUrl(card))
+def scrapCard(card,imagesInfo):
+    return {
+        "imageUrl": scrapImageUrl(card,imagesInfo),
+        "description": scrapDescription(card),
+        "price": scrapPrice(card),
+        "mainLink": scrapMainLink(card),
+        "mileage": scrapMileage(card)
+    }
 
-def scrapImageUrl(card):
+def scrapPrice(card):
     try:
-        # We will find the image block like this
-        imageBlock = card.find("img",class_="img-inner img-block")['src']
-        if (validators.url(imageBlock) == True):
-            return imageBlock
-        else:
-            imageBlock = card.find("img",class_="img-inner img-block")['data-src']
-            if(validators.url(imageBlock)==True):
-                return imageBlock
-            else:
-                imageBlock = card.find("img",class_="img-inner img-block")['data-original']
-                if(validators.url(imageBlock) == True):
-                    return imageBlock
-                else:
-                    return "Image not found"
+        price = card.find("span",{"data-test":"vehicleCardPriceLabelAmount"})
+        return price.text
+    except Exception as e:
+        return "Price not found"
+
+def scrapMainLink(card):
+    try:
+        link = card.find("a",{"data-test":"vehicleCardLink"})
+        return "https://truecar.com" + link['href']
+    except:
+        return "Link not found"
+
+def scrapImageUrl(card,imagesInfo):
+    try:
+        # Find the id of the card
+        idDiv = card.find("div",class_="relative rounded-md shadow-lg")
+        id = idDiv['data-test-item']
+        for info in imagesInfo:
+            if (id == info["vehicle"]["vin"]):
+                return "https://listings-prod.tcimg.net/" + info["galleryImages:{}"]["nodes"][0]["url"] + "-cr-540.jpg"
     except Exception as e:
         return "Image not found"
     
 def scrapDescription(card):
-    # FInd the div with w-full truncate name
-    pass
+    try:
+        descriptionDiv = card.find("div",class_="text-sm")
+        upperData = descriptionDiv.find("div",class_="w-full truncate font-bold")
+        upperData = upperData.text
+        upperData = upperData.split(" ")
+        upperData = upperData[1:]
+        upperData = " ".join(upperData)
+        lowerData = descriptionDiv.find("div",class_="w-full truncate")
+        lowerData = lowerData.text
+        totalData = upperData + " " + lowerData
+        return totalData
+    except Exception as e:
+        print(e)
+        return "Description not found"
 
 def getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius):
     # This is the base address
@@ -170,4 +237,5 @@ def interPretFigures(radius,zip,yearMin,yearMax):
 
     return [radius,zip,yearMin,yearMax]
     
-scrapCars(1,make="mercedes-benz",zip=60601,radius=75,recordsNumber=30,newRequest=True)
+if __name__ == '__main__':
+    raise Exception("This file is not meant to run by itself")

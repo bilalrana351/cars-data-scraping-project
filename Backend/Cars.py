@@ -32,8 +32,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius)
 
-    print(initialAddress)
-
     response = requests.get(initialAddress,headers=getHeader())
 
     soup = BeautifulSoup(response.text,'html.parser')
@@ -228,4 +226,5 @@ def findMainLink(card):
         return ("Main Link not found")
     
 if __name__ == "__main__":
+    scrapCars(1,yearMin=2010,yearMax=2023,make="Toyota",model="Camry",trim="LE",zip=60601,radius=100,newRequest=True)
     raise Exception("This file is not meant to be run directly")
