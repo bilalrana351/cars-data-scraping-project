@@ -1,6 +1,7 @@
 from flask import Flask,request, jsonify
 import json
-from Cars import scrapCars
+import Cars
+import TrueCar
 from flask_cors import CORS
 app = Flask(__name__)
 
@@ -17,8 +18,8 @@ def cars():
         make = None
         model = None
         distance = None
-        amount = 20
         zip = None
+        page = "1"
 
         if "make" in body:
             make = body["make"]
@@ -30,12 +31,11 @@ def cars():
             distance = body["distance"]
         if "zip" in body:
             zip = body["zip"]
-        if "amount" in body:
-            amount = body["amount"]
+        if "page" in body:
+            page = body["page"]
 
-        print(make,model,distance,zip)
-        x = scrapCars(make=make,model=model,zip=zip,radius=distance,recordsNumber=amount,newRequest=True)
-        return jsonify({"status": 200, "message": "Data Recieved!", "data": x})
+        x = TrueCar.scrapCars(1,make="honda")
+        return jsonify({"status": 200, "message": "Data Recieved!", "data":x})
     except Exception as e:
         print(e)
         return jsonify({"status": 500, "message": "Internal Server Error!"})

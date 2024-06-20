@@ -3,15 +3,18 @@ def replaceSpaces(model,make,trim):
     if model == None: # In case of None we will let None be None
         pass
     else: 
-        model = model.replace(" ","-").lower()
+        model = model.replace(" ","_").lower()
+        model = model.replace("-","_").lower()
     if make == None:
         pass
     else:
-        make = make.replace(" ","-").lower()
+        make = make.replace(" ","_").lower()
+        make = make.replace("-","_").lower()
     if trim == None:
         pass
     else:
-        trim = trim.replace(" ","-").lower()
+        trim = trim.replace(" ","_").lower()
+        trim = trim.replace("-","_").lower()
     return [model,make,trim]
 
 if __name__ == "__main__":
@@ -23,3 +26,6 @@ def areNewRecordsNeeded(current,pageCapacity):
         return True
     else:
         return False
+    
+if __name__ == "__main__":
+    raise Exception("This file is not meant to run by itself")

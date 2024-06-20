@@ -5,36 +5,24 @@ import validators
 from Headers import getHeader
 import Helpers
 
-# At the start we will start from the page 1
-pageNumber = 1
+totalRecords = 0
+totalPages = 1
+perPageRecords = 20
 
-# This will be the current number of records scraped
-currentRecords = 0
 
-# This will be the number of records in a page this website deploys
-# This site gives a maximum of 20 records per page 
-recordsInAPage = 20
-
-# This will be the variable that will keep track of whether the results have finished or not
-finished = False
-
-# Global variable, keeps the current information, is updated when there is a need for new bits of information
-info = []
-
-def scrapCars(yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=-1,recordsNumber=None,newRequest=False):
-
-    # We will use the page number here
-    global pageNumber
-    global currentRecords
-    global finished
-    global info
-
+def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=-1,newRequest=False):
+    global totalRecords
+    global totalPages
+    global perPageRecords
+    global totalRecords
+    global totalPages
 
     # If it is a new request we will reset the page number
     if newRequest:
         pageNumber = 1
-        currentRecords = 0   
-        finished = False
+    
+    if (pageNumber > totalPages):
+        return []
 
     # This all is input preprocessing
 
@@ -42,46 +30,74 @@ def scrapCars(yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,
     
     model,make,trim = Helpers.replaceSpaces(model,make,trim)
 
-    # If they are already finished this will just return an empty array
+    initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius)
+
+    response = requests.get(initialAddress,headers=getHeader())
+
+    soup = BeautifulSoup(response.text,'html.parser')
+
+    if newRequest:
+        totalRecords = findTotalRecords(soup,model,make,trim)
+        if (totalRecords == 0):
+            return []
+        totalPages = totalRecords // perPageRecords
+        totalPages += 1
+
+
+    finished = checkAdditionalListing(soup)
+
     if (finished):
+        info = scrapInfo(soup,True)
+        return info
+
+    info = scrapInfo(soup,False)
+
+    pageNumber += 1
+
+    return info
+
+def findTotalRecords(html,model,make,trim):
+    if (trim != None):
+        return findByTrim(html,model,make,trim)
+    elif (model != None):
+        return findByModel(html,make,model)
+    elif (make != None):
+        return findByMake(html)
+
+def findByTrim(html,model,make,trim):
+    try:
+        div = html.find("div",id="trim")
+        input_ = div.find("input",value=f"{make.replace(' ','-').lower()}-{model.replace(' ','-').lower()}-{trim.replace(' ','_').lower()}")
+        parentDiv = input_.parent
+        return extractValue(parentDiv.find("span",class_="filter-count").text)
+    except:
+        return 0
+
+def findByModel(html,make,model):
+    try:
+        div = html.find("div",id="model")
+        input_ = div.find("input",value=f"{make.replace(' ','_').lower()}-{model.replace(' ','_').lower()}")
+        parentDiv = input_.parent
+        return extractValue(parentDiv.find("span",class_="filter-count").text)
+    except:
+        return 0
+
+def findByMake(html):
+    div = html.find("div",id="model")
+    group = div.find_all("div",class_="sds-checkbox")
+    totalRecords = 0
+    for child in group:
         try:
-            info = info[recordsNumber:]
-            return info[0:recordsNumber]
-        except:
-            try:
-                infoFinal = info.copy()
-                info = [] # Empty the information
-                return infoFinal
-            except:
-                return []
+            totalRecords += extractValue(child.find("span",class_="filter-count").text)
+        except Exception as e:
+            print(e)
+    return totalRecords
 
-    # This will detect whether the current number of records have been replenished, i.e is there new records needed
-    needNewRecords = Helpers.areNewRecordsNeeded(currentRecords,recordsInAPage)
-
-    if(needNewRecords):
-        initialAddress = getInitialAddress(yearMin,yearMax,make,model,trim,zip,radius)
-
-        response = requests.get(initialAddress,headers=getHeader())
-
-        soup = BeautifulSoup(response.text,'html.parser')
-
-        finished = checkAdditionalListing(soup)
-
-        if (finished):
-            info = scrapInfo(soup,True)
-            return info[0:recordsNumber]
-
-        info = scrapInfo(soup,False)
-        # At the end we will increment the current record
-        currentRecords += recordsNumber
-
-        pageNumber += 1
-
-        return info[0:recordsNumber]
-    else:
-        info = info[recordsNumber:]
-        currentRecords += recordsNumber
-        return info[0:recordsNumber]
+def extractValue(string):
+    # String is of the form (10,000)
+    string = string.strip("()")
+    string = string.replace(",","")
+    return int(string)  
 
 def checkAdditionalListing(html):
     try:
@@ -104,13 +120,12 @@ def interPretFigures(yearMin,yearMax,zip,radius):
         zip = ""   
 
     # If the radius is -1 we will set it to all
-    if radius == -1:
+    if radius == -1 or radius == None:
         radius = "all"
     
     return [yearMin,yearMax,zip,radius]
 
-def getInitialAddress(yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=-1):
-    global pageNumber
+def getInitialAddress(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=-1):
     if model is None and make is not None:
        make = make.lower()
        initialAddress = f"https://www.cars.com/shopping/results/?dealer_id=&include_shippable=true&keyword=&list_price_max=&list_price_min=&makes[]={make}&maximum_distance={radius}&mileage_max=&monthly_payment=&page_size=20&page={pageNumber}&sort=best_match_desc&stock_type=all&year_max={yearMax}&year_min={yearMin}&zip={zip}"
@@ -137,26 +152,10 @@ def scrapInfo(html,last):
     return recordInfo
 
 def getNoRecordsInLastListing(html):
-    vehicleCardDiv = html.find("div",class_="vehicle-cards")
-
-    records = 0
-
-    for containedDiv in vehicleCardDiv:
-        try:
-            className = containedDiv['class']
-            className = ' '.join(className)
-            if (className == None):
-                pass
-            elif (className == "additional-listing-alert"):
-                return records
-            elif (className == "vehicle-card ep-theme-hubcap"):
-                records += 1
-            else:
-                pass
-        except:
-            pass
-    
-    return records
+    global totalRecords
+    global totalPages
+    global perPageRecords
+    return totalRecords - ((totalPages - 1) * perPageRecords)
 
 def scrapCard(card):
     imageUrl = findImage(card)
@@ -172,9 +171,6 @@ def findImage(card):
     link = None
     for vehicleImage in vehicleImages:
         supposedLink = vehicleImage['src']
-
-        if "data:image" in supposedLink:
-            supposedLink = vehicleImage['data-src']
         # Check if the supposed link is a valid url
         try:
             if (validators.url(supposedLink)):
@@ -189,8 +185,6 @@ def findImage(card):
         for vehicleImage in vehicleImages:
             supposedLink = vehicleImage['data-src']
             try:
-                if "data:image" in supposedLink:
-                    supposedLink = vehicleImage['src']
                 if (validators.url(supposedLink)):
                     link = supposedLink
                     break
@@ -232,4 +226,4 @@ def findMainLink(card):
         return ("Main Link not found")
     
 if __name__ == "__main__":
-    print("This file is not meant to be run directly")
+    raise Exception("This file is not meant to be run directly")
