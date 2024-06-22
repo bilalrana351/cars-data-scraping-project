@@ -18,10 +18,13 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim)
 
+    print(initialAddress)
 
     content = requests.get(initialAddress,headers=getHeader()).text
 
+
     soup = BeautifulSoup(content,'html.parser')
+
 
     if newRequest:
         maxPages = findTotalRecords(soup)
@@ -228,4 +231,5 @@ def getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim):
     return url
 
 if __name__ == "__main__":
+    scrapCars(pageNumber=1,make="Honda")
     raise Exception("This is a module, it should not be run")
