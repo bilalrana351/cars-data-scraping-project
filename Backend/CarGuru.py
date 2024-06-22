@@ -31,23 +31,16 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,vehicleCode,trim,zip,radius)
 
-    print(initialAddress)
-
     response = requests.get(initialAddress,headers=headers)
 
     content = response.text
 
     soup = BeautifulSoup(content,'html.parser')
 
-    with open("open.html","w") as f:
-        f.write(soup.prettify())
-
     if newRequest:
         maxPages = getMaxPages(soup)
     
     info = scrapInfo(soup,initialAddress)
-
-    print(info)
 
     return info
 
@@ -149,13 +142,11 @@ def scrapFromJson(car,url):
         "mainUrl": mainUrl,
         "mileage": mileage
     }
-    
-
 
 def findOutInitialCode(make,model):
     if model is None:
         # Lets load the makes car guru file
-        with open("makesvalueCarGuru.txt","r") as f:
+        with open("makesValuesCarGuru.txt","r") as f:
             makes = {}
             try:
                 makes = json.loads(f.read())
@@ -218,4 +209,5 @@ def getInitialAddress(pageNumber,yearMin,yearMax,code,trim,zip,radius):
     return url
 
 
-scrapCars(1,yearMin=2010,yearMax=2023,make="Toyota",model="Camry",trim="LE",zip=60601,radius=100,newRequest=True)
+if __name__ == "__main__":
+    raise Exception("This file is not meant to be run as a script")

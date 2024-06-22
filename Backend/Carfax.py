@@ -4,10 +4,11 @@ from Headers import getHeader
 import time
 import json
 
-maxPages = 1
+maxPages = 3
 
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
     global maxPages
+
 
     if pageNumber > maxPages:
         return []
@@ -22,14 +23,14 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     content = requests.get(initialAddress,headers=getHeader()).text
 
-
     soup = BeautifulSoup(content,'html.parser')
-
 
     if newRequest:
         maxPages = findTotalRecords(soup)
     
-    return scrapInfo(soup)
+    info = scrapInfo(soup)
+
+    return info
 
 def findTotalRecords(html):
     try:
@@ -90,8 +91,6 @@ def scrapCard(card,html):
         "mainLink": scrapMainLink(card),
         "mileage": scrapMileage(card)
     }
-
-    print(info)
 
     return info 
 
@@ -231,5 +230,4 @@ def getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim):
     return url
 
 if __name__ == "__main__":
-    scrapCars(pageNumber=1,make="Honda")
-    raise Exception("This is a module, it should not be run")
+    raise Exception("This file is not meant to be run directly")

@@ -39,8 +39,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(yearMin,yearMax,make,model,trim,zip,zipNo,radius,newSearch,previousShown)
 
-    print(initialAddress)
-
     response = requests.get(initialAddress,headers=header)
 
     content = response.text
@@ -49,14 +47,8 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     if newRequest:
         maxPages = calculateMaxPages(soup)
-
-    with open("open.html","w") as f:
-        f.write(soup.prettify())
     
     info = scrapInfo(soup)
-
-    with open("info2.json","w") as f:
-        json.dump(info,f,indent=4)    
 
     return info
 
@@ -199,4 +191,5 @@ def getInitialAddress(yearMin,yearMax,make,model,trim,zip,zipNo,radius,newSearch
         url += "zip=" + "60601"
     return url
 
-scrapCars(5,yearMin=2002,yearMax=2013,make="Chevrolet",model="Corvette",trim="Z06",zip=60601,radius=0,newRequest=False)
+if __name__ == "__main__":
+    raise Exception("This file is not meant to be run directly")

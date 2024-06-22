@@ -33,39 +33,33 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius)
 
-    try:
-        response = requests.get(initialAddress,headers=getHeader(),timeout=10)
-
-        soup = BeautifulSoup(response.text,'html.parser')
-    except:
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page = browser.new_page()
-            page.set_extra_http_headers({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'})
-            page.set_default_timeout(400000)
-            page.goto(initialAddress)
-            content = page.content()
-            soup = BeautifulSoup(content,'html.parser')
-            browser.close()
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.set_extra_http_headers({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'})
+        page.set_default_timeout(400000)
+        page.goto(initialAddress)
+        content = page.content()
+        soup = BeautifulSoup(content,'html.parser')
+        browser.close()
 
     if newRequest:
         totalRecords = findTotalRecords(soup,model,make,trim)
+        print(totalRecords)
         if (totalRecords == 0):
             return []
         totalPages = totalRecords // perPageRecords
         totalPages += 1
-
+        print(totalPages)
 
     finished = checkAdditionalListing(soup)
 
     if (finished):
         info = scrapInfo(soup,True)
+        print(info)
         return info
 
     info = scrapInfo(soup,False)
-
-    print(info)
-
 
     return info
 
@@ -239,5 +233,4 @@ def findMainLink(card):
         return ("Main Link not found")
     
 if __name__ == "__main__":
-    scrapCars(1,2010,2020,"Toyota","Camry","LE")
     raise Exception("This file is not meant to be run directly")
