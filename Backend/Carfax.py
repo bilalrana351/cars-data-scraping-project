@@ -18,7 +18,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim)
 
-    print(initialAddress)
 
     content = requests.get(initialAddress,headers=getHeader()).text
 
@@ -90,7 +89,7 @@ def scrapCard(card,html):
     }
 
     print(info)
-    
+
     return info 
 
 def scrapPrice(card,html):
@@ -228,4 +227,5 @@ def getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim):
     url += f"page={pageNumber}"
     return url
 
-scrapCars(1,2000,2010,"Toyota","Camry",zip=60601,radius=50,newRequest=True)
+if __name__ == "__main__":
+    raise Exception("This is a module, it should not be run")
