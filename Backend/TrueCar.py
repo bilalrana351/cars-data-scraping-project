@@ -13,7 +13,7 @@ recordsInAPage = 30
 maxPages = 1
 
 # This site gives a maximum of 30 records per page
-def scrapCars(pageNumber=1,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,recordsNumber=None,newRequest=False):
+def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
     global recordsInAPage
     global maxPages
 
@@ -133,7 +133,7 @@ def scrapCard(card,imagesInfo):
         "imageUrl": scrapImageUrl(card,imagesInfo),
         "description": scrapDescription(card),
         "price": scrapPrice(card),
-        "mainLink": scrapMainLink(card),
+        "mainUrl": scrapMainLink(card),
         "mileage": scrapMileage(card)
     }
 
@@ -235,7 +235,7 @@ def interPretFigures(radius,zip,yearMin,yearMax):
     state = state.replace(" ","-")
     zip = city + "-" + state
 
-    return radius,zip,yearMin,yearMax
+    return [radius,zip,yearMin,yearMax]
     
 if __name__ == '__main__':
     raise Exception("This file is not meant to run by itself")

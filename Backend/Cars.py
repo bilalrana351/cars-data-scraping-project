@@ -4,6 +4,7 @@ import requests
 import validators
 from Headers import getHeader
 import Helpers
+from playwright.sync_api import sync_playwright
 
 totalRecords = 0
 totalPages = 1
@@ -32,9 +33,20 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius)
 
-    response = requests.get(initialAddress,headers=getHeader())
+    try:
+        response = requests.get(initialAddress,headers=getHeader(),timeout=4)
 
-    soup = BeautifulSoup(response.text,'html.parser')
+        soup = BeautifulSoup(response.text,'html.parser')
+    except:
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.set_extra_http_headers({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'})
+            page.set_default_timeout(400000)
+            page.goto(initialAddress)
+            content = page.content()
+            soup = BeautifulSoup(content,'html.parser')
+            browser.close()
 
     if newRequest:
         totalRecords = findTotalRecords(soup,model,make,trim)
@@ -51,9 +63,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
         return info
 
     info = scrapInfo(soup,False)
-
-    pageNumber += 1
-
     return info
 
 def findTotalRecords(html,model,make,trim):
@@ -226,4 +235,5 @@ def findMainLink(card):
         return ("Main Link not found")
     
 if __name__ == "__main__":
+    scrapCars(1,make="Honda")
     raise Exception("This file is not meant to be run directly")

@@ -4,7 +4,7 @@
       <div class="holder">
         <div class="data">Cars Scraping Project</div>
         <v-spacer></v-spacer>
-        <div class="data data2">Page 01</div>
+        <div class="data data2">Page {{ props.page }}</div>
         <v-menu>
           <template v-slot:activator="{ props }">
             <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
@@ -30,7 +30,9 @@
 import { defineEmits, defineProps, onMounted, watch } from "vue";
 import router from "../router";
 
-const props = defineProps({});
+const props = defineProps({
+  page: Number,
+});
 
 const items = [
   {
