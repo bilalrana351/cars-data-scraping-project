@@ -42,6 +42,8 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     
     info = scrapInfo(soup,initialAddress)
 
+    print(info)
+
     return info
 
 def interPretFigures(radius,zip,yearMin,yearMax):
@@ -74,7 +76,7 @@ def changeTrim(trim):
 
 def findMakeCode(make):
     try:
-        with open("makesValuesCarGuru.txt","r") as f:
+        with open("Backend\\makesValuesCarGuru.txt","r") as f:
             values = json.loads(f.read())
             return values[make]
     except Exception as e:
@@ -146,7 +148,7 @@ def scrapFromJson(car,url):
 def findOutInitialCode(make,model):
     if model is None:
         # Lets load the makes car guru file
-        with open("makesValuesCarGuru.txt","r") as f:
+        with open("Backend\\makesValuesCarGuru.txt","r") as f:
             makes = {}
             try:
                 makes = json.loads(f.read())
@@ -160,7 +162,7 @@ def findOutInitialCode(make,model):
             return None
     elif model is not None and make is not None:
         # Lets load the models car guru file
-        with open("modelsCarGuru.txt","r") as f:
+        with open("Backend\\modelsCarGuru.txt","r") as f:
             models = {}
             try:
                 models = json.loads(f.read())
@@ -210,4 +212,5 @@ def getInitialAddress(pageNumber,yearMin,yearMax,code,trim,zip,radius):
 
 
 if __name__ == "__main__":
+    scrapCars(1,make="honda",newRequest=True)
     raise Exception("This file is not meant to be run as a script")

@@ -30,6 +30,8 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     
     info = scrapInfo(soup)
 
+    print(info)
+
     return info
 
 def findTotalRecords(html):

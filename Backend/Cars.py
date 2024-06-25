@@ -38,7 +38,7 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
         page = browser.new_page()
         page.set_extra_http_headers({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'})
         page.set_default_timeout(400000)
-        page.goto(initialAddress)
+        page.goto(initialAddress,wait_until="domcontentloaded")
         content = page.content()
         soup = BeautifulSoup(content,'html.parser')
         browser.close()
