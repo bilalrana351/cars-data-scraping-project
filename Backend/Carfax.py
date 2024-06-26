@@ -19,8 +19,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim)
 
-    print(initialAddress)
-
     content = requests.get(initialAddress,headers=getHeader()).text
 
     soup = BeautifulSoup(content,'html.parser')
@@ -29,8 +27,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
         maxPages = findTotalRecords(soup)
     
     info = scrapInfo(soup)
-
-    print(info)
 
     return info,maxPages
 
@@ -75,14 +71,14 @@ def scrapInfo(html):
                 # We will append to the info array
                 info.append(infoScraped)
             except Exception as e:
-                print(e,"In scrapInfo upper") 
+                pass
         if (" ".join(className) == "srp-list-item"):
             try:
                 infoScraped = scrapCard(listing,html)
                 # We will append to the info array
                 info.append(infoScraped)
             except Exception as e:
-                print(e,"In scrapInfo lower")
+                pass
     return info
 
 def scrapCard(card,html):
@@ -103,7 +99,6 @@ def scrapPrice(card,html):
         priceSpan = priceSpan.split(":")[1]
         return int(priceSpan.strip("()").replace("$","").replace(",","").strip())
     except Exception as e:
-        print(e,"In scrapPrice")
         return "Price not found"
 
 def scrapMainLink(card):
@@ -128,7 +123,6 @@ def scrapMileage(card):
         divText = divText.split(" ")[0].replace(",","")
         return int(divText)
     except Exception as e:
-        print("Mileage not found",e,"at scrapMileage")
         return "Mileage not found"
 
 def scrapDescription(card,html):
@@ -140,7 +134,6 @@ def scrapDescription(card,html):
         # Find the image of the vehicle
         return findDescriptionFromId(id_,html)
     except Exception as e:
-        print(e,"In scrapImageUrl")
         return "Image not found"
 
 def findDescriptionFromId(id,html):
@@ -159,9 +152,7 @@ def findDescriptionFromId(id,html):
                 if str(vehicle["vehicleIdentificationNumber"]) == str(id):
                     return vehicle["name"]
         except Exception as e:
-            print(e + "In FindDescriptionFromId") 
             pass
-    print("Description not found")
     return "Description not found"
 
 def scrapImageUrl(card,html):
@@ -173,7 +164,6 @@ def scrapImageUrl(card,html):
         # Find the image of the vehicle
         return findImageFromId(id_,html)
     except Exception as e:
-        print(e,"In scrapImageUrl")
         return "Image not found"
 
 def findImageFromId(id,html):
@@ -192,9 +182,7 @@ def findImageFromId(id,html):
                 if str(vehicle["vehicleIdentificationNumber"]) == str(id):
                     return vehicle["image"]
         except Exception as e:
-            print(e + "In image") 
             pass
-    print("Image not found")
     return "Image not found"
             
     

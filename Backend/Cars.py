@@ -45,12 +45,10 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     if newRequest:
         totalRecords = findTotalRecords(soup,model,make,trim)
-        print(totalRecords)
         if (totalRecords == 0):
             return []
         totalPages = totalRecords // perPageRecords
         totalPages += 1
-        print(totalPages)
 
     finished = checkAdditionalListing(soup)
 
@@ -96,7 +94,7 @@ def findByMake(html):
         try:
             totalRecords += extractValue(child.find("span",class_="filter-count").text)
         except Exception as e:
-            print(e)
+            pass
     return totalRecords
 
 def extractValue(string):
@@ -183,9 +181,7 @@ def findImage(card):
                 link = supposedLink
                 break
         except Exception as e:
-            # TODO : Remove this
-            print(e)
-    
+            pass       
     # If link is still none we will loop through the vehicle images again with data-src
     if link is None:
         for vehicleImage in vehicleImages:

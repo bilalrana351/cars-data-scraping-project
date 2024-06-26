@@ -26,8 +26,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius)
 
-    print(initialAddress)
-
     response = requests.get(initialAddress,headers=headers)
 
     content = None
@@ -35,18 +33,15 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     try:
         content = response.json()
     except Exception as e:
-        print(e)
         return []
 
     if newRequest:
         maxPages = getMaxPages(content)
-        print(maxPages)
     
     info = scrapInfo(content)
 
-    # print(info)
 
-    return info
+    return info,maxPages
 
 def interPretFigures(radius,zip,yearMin,yearMax):
     if yearMax == None:
@@ -90,10 +85,8 @@ def getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius):
 def getMaxPages(content):
     try:
         count = content["totalCount"]
-        print(count)
         return (count // 24) + 1
     except Exception as e:
-        print(e,"In getMaxPages")
         return 0
 
 def scrapInfo(content):
@@ -102,27 +95,22 @@ def scrapInfo(content):
         try:
             mainUrl = "https://www.carmax.com/car/" + str(car["stockNumber"])
         except Exception as e:
-            print(e,"in url")
             mainUrl = "Url not found"
         try:
             description = str(car["year"]) + " " + car["make"] + " " + car["model"] + car["trim"]
         except Exception as e:
-            print(e,"in description")
             description = "Description not found"
         try:
             price = car["basePrice"]
         except Exception as e:
-            print(e,"in price")
             price = "Price not found"
         try:
             imageUrl = car["heroImageUrl"]
         except Exception as e:
-            print(e,"in image")
             imageUrl = "Image not found"
         try:
             mileage = car["mileage"]
         except:
-            print(e,"in mileage")
             mileage = "Mileage not found"
         info.append({
             "mainUrl" : mainUrl,

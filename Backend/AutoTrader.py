@@ -71,7 +71,7 @@ def scrapFromListingCollection(html):
         try:
             info.append(extractInformation(data))
         except Exception as e:
-            print(e,"in scrapFromListingCollection")
+            pass
     return info
 
 def scrapFromListings(html):
@@ -117,11 +117,7 @@ def calculateMaxPages(html):
 
     maxRecords = int(maxReordDiv.text.split(" ")[0].replace(",",""))
 
-    print(maxRecords)
-
     maxPages = maxRecords // perPageResults + 1
-
-    print(maxPages)
 
     return maxPages
 

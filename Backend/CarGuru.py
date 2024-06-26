@@ -42,7 +42,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     
     info = scrapInfo(soup,initialAddress)
 
-    print(info)
 
     return info,maxPages
 
@@ -63,10 +62,8 @@ def getMaxPages(html):
         pageCountFooter = html.find("div",class_="CX86_7").text
         pageCountFooter = pageCountFooter.split("f")
         count = int(pageCountFooter[-1])
-        print(count)
         return count
     except Exception as e:
-        print(e,"In getMaxPages")
         return 0
 
 def changeTrim(trim):
@@ -80,7 +77,6 @@ def findMakeCode(make):
             values = json.loads(f.read())
             return values[make]
     except Exception as e:
-        print(e)
         return None
 
 def findModelCode(make,model):
@@ -96,7 +92,6 @@ def scrapInfo(html,url):
     info = []
 
     if ldJson is None:
-        print("No load json found")
         return []
     
     ldJson = json.loads(ldJson.text)
@@ -114,28 +109,23 @@ def scrapFromJson(car,url):
     try:
         imageUrl = car['itemOffered']["image"]
     except Exception as e:
-        print(e,"In image url")
         imageUrl = "Image not found"
     try:
         description = car['itemOffered']['name']
     except Exception as e:
-        print(e,"In description")
         description = "Description not found"
     try:
         price = car['price']
     except Exception as e:
-        print(e,"In price")
         price = "Price not found"
     try:
         sku = car['itemOffered']['sku']
         mainUrl = url + "#listing=" + sku
     except Exception as e:
-        print(e,"In sku")
         mainUrl = "Url not found"
     try:
         mileage = car['itemOffered']['mileageFromOdometer']['value']
     except Exception as e:
-        print(e,"In mileage")
         mileage = "Mileage not found"
     return {
         "imageUrl": imageUrl,
@@ -153,7 +143,6 @@ def findOutInitialCode(make,model):
             try:
                 makes = json.loads(f.read())
             except Exception as e:
-                print(e)
                 makes = {}
             # Now we have to find the make code
             for fileMake in makes:
@@ -167,7 +156,6 @@ def findOutInitialCode(make,model):
             try:
                 models = json.loads(f.read())
             except Exception as e:
-                print(e)
                 models = {}
             # Now we have to find the model code
             for fileModel in models:

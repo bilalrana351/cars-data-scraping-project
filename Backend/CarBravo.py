@@ -61,8 +61,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim)
 
-    print(initialAddress)
-
     fillUpJsonData(yearMin,yearMax,make,model,trim,zip,radius,pageNumber,initialAddress)
 
     with open("carbravo.txt","w",encoding="utf-8") as f:
@@ -73,8 +71,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
         nextPageTokens[pageNumber] = nextToken
     
     json_data['pagination']['nextPageToken'] = nextPageTokens[int(pageNumber)]
-
-    print(nextPageTokens)
 
     # Have to add some logic for the next page id
 
@@ -87,7 +83,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     if newRequest:
         maxPages = findTotalRecords(content)
-        print(maxPages)
     
     info = scrapInfo(content)
 
@@ -157,7 +152,6 @@ def findTotalRecords(content):
     try:
         return int(content['data']['count'] // 20 + 1)
     except Exception as e:
-        print(e,"In findTotalRecords")
         return 0
 
 def interPretFigures(radius,zip,yearMin,yearMax):
