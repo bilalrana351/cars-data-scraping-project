@@ -4,7 +4,7 @@ from Headers import getHeader
 import time
 import json
 
-maxPages = 3
+maxPages = 1
 
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
     global maxPages
@@ -32,7 +32,7 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     print(info)
 
-    return info
+    return info,maxPages
 
 def findTotalRecords(html):
     try:

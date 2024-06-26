@@ -47,7 +47,7 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     info = scrapInfo(soup,imagesInfo,False)
 
-    return info
+    return info,maxPages
 
 def findTotalRecords(html):
     try:

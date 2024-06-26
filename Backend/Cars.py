@@ -56,12 +56,11 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     if (finished):
         info = scrapInfo(soup,True)
-        print(info)
-        return info
+        return info,totalPages
 
     info = scrapInfo(soup,False)
 
-    return info
+    return info,totalPages
 
 def findTotalRecords(html,model,make,trim):
     if (trim != None):

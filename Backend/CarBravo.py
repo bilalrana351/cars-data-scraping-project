@@ -40,7 +40,7 @@ json_data = {
     }
 }
 
-maxPages = 2
+maxPages = 1
 
 # These will be the next page ids that we will use to get the next page
 nextPageTokens = {}
@@ -93,7 +93,7 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     nextToken = getNextPageToken(content)
 
-    return info
+    return info,maxPages
 
 def fillUpJsonData(yearMin,yearMax,make,model,trim,zip,radius,pageNumber,address):
     global headers

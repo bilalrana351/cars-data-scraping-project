@@ -44,7 +44,7 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     print(info)
 
-    return info
+    return info,maxPages
 
 def interPretFigures(radius,zip,yearMin,yearMax):
     if radius == -1 or zip == None:

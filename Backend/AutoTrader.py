@@ -20,7 +20,7 @@ perPageResults = 25
 
 searchRadius = 0 # For Nationwide search
 
-maxPages = 10
+maxPages = 1
 
 
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
@@ -50,7 +50,7 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     
     info = scrapInfo(soup)
 
-    return info
+    return info,maxPages
 
 def scrapInfo(html):
     info = []
