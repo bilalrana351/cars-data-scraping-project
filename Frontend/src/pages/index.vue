@@ -231,12 +231,15 @@ onMounted(() => {
 });
 
 const checkResult = (data) => {
-  console.log(data);
   count.value += 1;
-  if (count.value == 8) {
-    console.log("Complete");
+  if (data.length > 0) {
     loading.value = false;
   }
+  data = data.filter((e) => {
+    if (e != undefined) {
+      return e;
+    }
+  });
   carsData.value = carsData.value.concat(data);
   console.log(carsData.value);
 };
