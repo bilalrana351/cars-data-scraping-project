@@ -57,7 +57,6 @@ def findTotalRecords(html):
         content = content.split(" ")[0]
         return int(content.replace(",",""))
     except Exception as e:
-        print(e)
         return 0 
 
 def scrapMileage(html):
@@ -71,7 +70,6 @@ def scrapMileage(html):
         mileage = mileage.replace(" ","")
         return int(mileage)
     except Exception as e:
-        print(e)
         return "Mileage not found"
 
 def findAllImagesUrl(html):
@@ -175,7 +173,6 @@ def scrapDescription(card):
         totalData = upperData + " " + lowerData
         return totalData
     except Exception as e:
-        print(e)
         return "Description not found"
 
 def getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius):
@@ -218,7 +215,7 @@ def interPretFigures(radius,zip,yearMin,yearMax):
 
     # This website demands that you give the zip code so it cannot be none, else we will return empty
     if zip == None:
-        zip = "10001"
+        zip = 10001
     
     if yearMin == None:
         yearMin = "min"

@@ -20,7 +20,7 @@ perPageResults = 25
 
 searchRadius = 0 # For Nationwide search
 
-maxPages = 10
+maxPages = 1
 
 
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
@@ -39,8 +39,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(yearMin,yearMax,make,model,trim,zip,zipNo,radius,newSearch,previousShown)
 
-    print(initialAddress)
-
     response = requests.get(initialAddress,headers=header)
 
     content = response.text
@@ -49,14 +47,8 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     if newRequest:
         maxPages = calculateMaxPages(soup)
-
-    with open("open.html","w") as f:
-        f.write(soup.prettify())
     
     info = scrapInfo(soup)
-
-    with open("info2.json","w") as f:
-        json.dump(info,f,indent=4)    
 
     return info
 
@@ -79,7 +71,7 @@ def scrapFromListingCollection(html):
         try:
             info.append(extractInformation(data))
         except Exception as e:
-            print(e,"in scrapFromListingCollection")
+            pass
     return info
 
 def scrapFromListings(html):
@@ -114,9 +106,9 @@ def extractInformation(data):
     except:
         totalList["imageUrl"] = "Url not found"
     try:
-        totalList['mainLink'] = data['url']
+        totalList['mainUrl'] = data['url']
     except:
-        totalList['mainLink'] = "Link not found"
+        totalList['mainUrl'] = "Link not found"
     return totalList
 
 
@@ -125,11 +117,7 @@ def calculateMaxPages(html):
 
     maxRecords = int(maxReordDiv.text.split(" ")[0].replace(",",""))
 
-    print(maxRecords)
-
     maxPages = maxRecords // perPageResults + 1
-
-    print(maxPages)
 
     return maxPages
 
@@ -198,3 +186,6 @@ def getInitialAddress(yearMin,yearMax,make,model,trim,zip,zipNo,radius,newSearch
     else:
         url += "zip=" + "60601"
     return url
+
+if __name__ == "__main__":
+    raise Exception("This file is not meant to be run directly")

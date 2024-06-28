@@ -57,6 +57,10 @@
       </v-card>
       <div v-if="!loading" class="single-nav">
         <div class="title">Filtered Cars</div>
+        <div class="button-panel">
+          <v-btn class="button" @click="prev">Previous Page</v-btn>
+          <v-btn class="button" @click="next">Next Page</v-btn>
+        </div>
       </div>
       <div v-show="loading" class="loading">
         <Loader />
@@ -110,6 +114,20 @@ const carsData = ref([]);
 const currentModels = ref([]);
 const currentMakes = ref([]);
 const currentDistances = ref([]);
+const count = ref(0);
+
+const prev = () => {
+  if (page.value == "1") {
+    return;
+  }
+  page.value = (Number(page.value) - 1).toString();
+  fetchCars();
+};
+
+const next = () => {
+  page.value = (Number(page.value) + 1).toString();
+  fetchCars();
+};
 
 const zipCodeRegex =
   /^(?:\d{5}(?:-\d{4})?|[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d|(?:[A-Za-z]{1,2}\d[A-Za-z\d]? \d[A-Za-z]{2}|GIR 0AA))$/;
@@ -130,7 +148,7 @@ const params = reactive({
 watch(make, (value) => {
   const filter = filters.find((f) => f.make === value);
   currentModels.value = filter ? filter.models : [];
-  if (!params.model) {
+  if (!params.model || !currentModels.value.includes(params.model)) {
     model.value = "All Models";
   }
 });
@@ -212,33 +230,67 @@ onMounted(() => {
   scrapeCars();
 });
 
-const scrapeCars = async () => {
-  loading.value = true;
-
-  try {
-    const response = await fetch("http://localhost:5000/api/cars", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        make: make.value,
-        model: model.value,
-        distance: distance.value,
-        zip: zip.value,
-        trim: trim.value,
-        page: page.value,
-      }),
-    });
-    const data = await response.json();
-    if (data.status === 200) {
-      carsData.value = data.data;
-    }
-  } catch (error) {
-    console.error(error);
-  } finally {
+const checkResult = (data) => {
+  console.log(data);
+  count.value += 1;
+  if (count.value == 8) {
+    console.log("Complete");
     loading.value = false;
   }
+  carsData.value = carsData.value.concat(data);
+  console.log(carsData.value);
+};
+
+const getWebData = async (site) => {
+  console.log("REQUESTING: " + site);
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/cars?website=" + site,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          make: make.value,
+          model: model.value,
+          distance: distance.value,
+          zip: zip.value,
+          trim: trim.value,
+          page: Number(page.value),
+        }),
+      }
+    );
+    const data = await response.json();
+    console.log(data);
+    console.log("DATA RECIEVED: " + site);
+    checkResult(data.data);
+  } catch {
+    console.log("DATA ERROR: " + site);
+    checkResult([]);
+  }
+};
+
+const scrapeCars = () => {
+  loading.value = true;
+
+  if (!page.value) {
+    page.value = 1;
+  }
+
+  if (!make.value) {
+    loading.value = false;
+    return;
+  }
+
+  getWebData("autotrader");
+  getWebData("carbravo");
+  getWebData("carfax");
+  getWebData("carguru");
+  getWebData("carmax");
+  getWebData("cars");
+  getWebData("edmund");
+  getWebData("truecar");
 };
 
 const fetchCars = () => {
@@ -354,8 +406,6 @@ main {
 
 .single-nav {
   margin: auto;
-  display: flex;
-  justify-content: left;
   align-items: center;
   width: 100%;
   max-width: 1200px;
@@ -432,6 +482,10 @@ main {
 
 .card2 img {
   height: 300px;
+  min-width: 400px;
+  max-width: 400px;
+  object-fit: cover;
+  border: 1px solid #333;
 }
 
 .card2 h3 {
@@ -459,5 +513,10 @@ main {
 
 .text2 span {
   font-weight: bold;
+}
+
+.button-panel {
+  display: flex;
+  gap: 20px;
 }
 </style>

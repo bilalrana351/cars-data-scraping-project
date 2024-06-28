@@ -33,20 +33,15 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius)
 
-    try:
-        response = requests.get(initialAddress,headers=getHeader(),timeout=4)
-
-        soup = BeautifulSoup(response.text,'html.parser')
-    except:
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page = browser.new_page()
-            page.set_extra_http_headers({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'})
-            page.set_default_timeout(400000)
-            page.goto(initialAddress)
-            content = page.content()
-            soup = BeautifulSoup(content,'html.parser')
-            browser.close()
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.set_extra_http_headers({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'})
+        page.set_default_timeout(400000)
+        page.goto(initialAddress,wait_until="domcontentloaded")
+        content = page.content()
+        soup = BeautifulSoup(content,'html.parser')
+        browser.close()
 
     if newRequest:
         totalRecords = findTotalRecords(soup,model,make,trim)
@@ -55,14 +50,14 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
         totalPages = totalRecords // perPageRecords
         totalPages += 1
 
-
     finished = checkAdditionalListing(soup)
 
     if (finished):
         info = scrapInfo(soup,True)
-        return info
+        return info,totalPages
 
     info = scrapInfo(soup,False)
+
     return info
 
 def findTotalRecords(html,model,make,trim):
@@ -99,7 +94,7 @@ def findByMake(html):
         try:
             totalRecords += extractValue(child.find("span",class_="filter-count").text)
         except Exception as e:
-            print(e)
+            pass
     return totalRecords
 
 def extractValue(string):
@@ -172,7 +167,7 @@ def scrapCard(card):
     mileage = findMileage(card)
     price = findPrice(card)
     mainLink = "https://cars.com" + findMainLink(card)
-    return {"imageUrl":imageUrl,"description":description,"mileage":mileage,"price":price,"mainLink":mainLink}
+    return {"imageUrl":imageUrl,"description":description,"mileage":mileage,"price":price,"mainUrl":mainLink}
 
 def findImage(card):
     # Find all the instances of the vehicle Images
@@ -186,9 +181,7 @@ def findImage(card):
                 link = supposedLink
                 break
         except Exception as e:
-            # TODO : Remove this
-            print(e)
-    
+            pass       
     # If link is still none we will loop through the vehicle images again with data-src
     if link is None:
         for vehicleImage in vehicleImages:
@@ -235,5 +228,4 @@ def findMainLink(card):
         return ("Main Link not found")
     
 if __name__ == "__main__":
-    scrapCars(1,make="Honda")
     raise Exception("This file is not meant to be run directly")
