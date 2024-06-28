@@ -1,4 +1,7 @@
 from flask import Flask,request, jsonify
+from flask import render_template, send_from_directory
+from waitress import serve
+import requests
 import json
 import AutoTrader
 import CarBravo
@@ -10,13 +13,25 @@ import Cars
 import Edmund
 import TrueCar
 from flask_cors import CORS
+import webbrowser
+import socket
+
 app = Flask(__name__)
 
 CORS(app)
 
 @app.route('/')
-def home():
-    return jsonify({"status": 200, "message": "Server is running!"})
+def index():
+    return render_template('index.html')
+
+@app.route('/<path:path>')
+def send_static(path):
+    print("Requested path:", path)
+    links = [""]
+    if path in links:
+        return render_template('index.html')
+    else:
+        return send_from_directory('static', path)
 
 @app.route('/api/cars', methods=['POST'])
 def cars():
@@ -74,5 +89,19 @@ def cars():
         print(e)
         return jsonify({"status": 500, "message": "Internal Server Error!"})
 
+def get_ipv4_address():
+    hostname = socket.gethostname()
+    ipv4_address = socket.gethostbyname(hostname)
+    return ipv4_address
+
+@app.route('/getip', methods=['GET'])
+def getip():
+    return json.dumps({"STATUS":"OK","IP":"http://" + get_ipv4_address() + ":" + str(PORT)})
+
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    PORT = 5432
+    print("Starting Server......\n")
+    print("LOCAL: http://127.0.0.1:" + str(PORT))
+    print("GLOBAL: http://" + get_ipv4_address() + ":" + str(PORT))
+    webbrowser.open("http://" + get_ipv4_address() + ":" + str(PORT), new=0, autoraise=True)
+    serve(app, host='0.0.0.0', port=PORT)

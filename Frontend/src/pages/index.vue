@@ -1,6 +1,17 @@
 <template>
   <main>
     <Navbar :page="page" />
+    <div class="notification-box">
+      <v-alert
+        class="notice-item"
+        v-for="item in carStatus"
+        color="info"
+        icon="$info"
+        :title="item"
+        closable
+        text=""
+      ></v-alert>
+    </div>
     <div class="content">
       <div v-if="!loading" class="title-nav">
         <div class="title">Search Filter</div>
@@ -115,6 +126,7 @@ const currentModels = ref([]);
 const currentMakes = ref([]);
 const currentDistances = ref([]);
 const count = ref(0);
+const carStatus = ref([]);
 
 const prev = () => {
   if (page.value == "1") {
@@ -230,7 +242,7 @@ onMounted(() => {
   scrapeCars();
 });
 
-const checkResult = (data) => {
+const checkResult = (site, data) => {
   count.value += 1;
   if (data.length > 0) {
     loading.value = false;
@@ -241,6 +253,11 @@ const checkResult = (data) => {
     }
   });
   carsData.value = carsData.value.concat(data);
+  //Remove all duplicates from the array
+  carsData.value = carsData.value.filter(
+    (item, index) => carsData.value.indexOf(item) === index
+  );
+  carStatus.value.push(site + " : " + data.length + " cars found");
   console.log(carsData.value);
 };
 
@@ -267,10 +284,10 @@ const getWebData = async (site) => {
     const data = await response.json();
     console.log(data);
     console.log("DATA RECIEVED: " + site);
-    checkResult(data.data);
+    checkResult(site, data.data);
   } catch {
     console.log("DATA ERROR: " + site);
-    checkResult([]);
+    checkResult(site, []);
   }
 };
 
@@ -294,6 +311,7 @@ const scrapeCars = () => {
   getWebData("cars");
   getWebData("edmund");
   getWebData("truecar");
+  getWebData("carksl");
 };
 
 const fetchCars = () => {
@@ -461,6 +479,16 @@ main {
       "distance trim zip";
     grid-template-columns: repeat(3, 1fr);
   }
+  .card2 .divider {
+    flex-direction: column;
+    min-height: 550px;
+    text-align: center;
+    margin: 0;
+  }
+
+  .card2 img {
+    margin: auto;
+  }
 }
 
 @media (max-width: 600px) {
@@ -521,5 +549,16 @@ main {
 .button-panel {
   display: flex;
   gap: 20px;
+}
+
+.notification-box {
+  position: absolute;
+  left: 0;
+  z-index: 2;
+  margin: 10px;
+}
+
+.notice-item {
+  margin: 10px 0;
 }
 </style>

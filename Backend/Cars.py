@@ -1,14 +1,33 @@
 import time
+import urllib.request
 from bs4 import BeautifulSoup
 import requests
 import validators
 from Headers import getHeader
 import Helpers
 from playwright.sync_api import sync_playwright
+import urllib
 
 totalRecords = 0
 totalPages = 1
 perPageRecords = 20
+
+headers = {
+    'accept': '*/*',
+    'accept-language': 'en-US,en;q=0.9',
+    'cache-control': 'no-cache',
+    'origin': 'https://www.cars.com',
+    'pragma': 'no-cache',
+    'priority': 'u=1, i',
+    'referer': 'https://www.cars.com/',
+    'sec-ch-ua': '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
+    'sec-ch-ua-mobile': '?1',
+    'sec-ch-ua-platform': '"Android"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'no-cors',
+    'sec-fetch-site': 'cross-site',
+    'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36',
+}
 
 
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=-1,newRequest=False):
@@ -17,6 +36,7 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     global perPageRecords
     global totalRecords
     global totalPages
+    global headers
 
     # If it is a new request we will reset the page number
     if newRequest:
@@ -33,15 +53,22 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     initialAddress = getInitialAddress(pageNumber,yearMin,yearMax,make,model,trim,zip,radius)
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
-        page.set_extra_http_headers({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'})
-        page.set_default_timeout(400000)
-        page.goto(initialAddress,wait_until="domcontentloaded")
-        content = page.content()
-        soup = BeautifulSoup(content,'html.parser')
-        browser.close()
+    # Get the html content of the page
+    try:
+        response = requests.get(initialAddress,headers=headers,timeout=5)
+        content = response.text
+    except:
+        print("Failed to get the content by get request")
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.set_extra_http_headers({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'})
+            page.set_default_timeout(400000)
+            page.goto(initialAddress,wait_until="domcontentloaded")
+            content = page.content()
+            browser.close()
+
+    soup = BeautifulSoup(content,'html.parser')
 
     if newRequest:
         totalRecords = findTotalRecords(soup,model,make,trim)
@@ -58,7 +85,7 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     info = scrapInfo(soup,False)
 
-    return info
+    return info,totalPages
 
 def findTotalRecords(html,model,make,trim):
     if (trim != None):
@@ -167,7 +194,7 @@ def scrapCard(card):
     mileage = findMileage(card)
     price = findPrice(card)
     mainLink = "https://cars.com" + findMainLink(card)
-    return {"imageUrl":imageUrl,"description":description,"mileage":mileage,"price":price,"mainUrl":mainLink}
+    return {"imageUrl":imageUrl,"description":description,"mileage":mileage,"price":price,"mainLink":mainLink}
 
 def findImage(card):
     # Find all the instances of the vehicle Images
