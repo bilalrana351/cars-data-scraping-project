@@ -97,11 +97,3 @@ def get_ipv4_address():
 @app.route('/getip', methods=['GET'])
 def getip():
     return json.dumps({"STATUS":"OK","IP":"http://" + get_ipv4_address() + ":" + str(PORT)})
-
-if __name__ == '__main__':
-    PORT = 5432
-    print("Starting Server......\n")
-    print("LOCAL: http://127.0.0.1:" + str(PORT))
-    print("GLOBAL: http://" + get_ipv4_address() + ":" + str(PORT))
-    webbrowser.open("http://" + get_ipv4_address() + ":" + str(PORT), new=0, autoraise=True)
-    serve(app, host='0.0.0.0', port=PORT)
