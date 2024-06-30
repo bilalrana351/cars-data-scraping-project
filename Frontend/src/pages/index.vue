@@ -66,6 +66,46 @@
           </v-responsive>
         </div>
       </v-card>
+      <div v-if="!loading" class="searchpadding">
+        <v-card class="card3">
+          <div class="search-card">
+            <v-text-field
+              v-model="searchQuery"
+              hide-details
+              solo
+              flat
+              label="Search"
+              max-width="500px"
+              class="search"
+              color="red darken 3"
+              variant="outlined"
+            ></v-text-field>
+
+            <v-select
+              v-model="selection"
+              :items="items"
+              label="Sort by"
+              max-width="500px"
+              solo
+              flat
+              class="sortbyselection"
+              color="red darken 3"
+              variant="outlined"
+            ></v-select>
+
+            <v-radio-group
+              row
+              v-model="sortOrder"
+              @change="sortCars"
+              class="radiogroup"
+              color="red"
+            >
+              <v-radio label="Ascending" value="asc"></v-radio>
+              <v-radio label="Descending" value="desc"></v-radio>
+            </v-radio-group>
+          </div>
+        </v-card>
+      </div>
       <div v-if="!loading" class="single-nav">
         <div class="title">Filtered Cars</div>
         <div class="button-panel">
@@ -77,7 +117,7 @@
         <Loader />
       </div>
       <br />
-      <v-card class="card2" v-for="(item, index) in carsData" :key="index">
+      <v-card class="card2" v-for="(item, index) in filteredCars" :key="index">
         <div class="divider">
           <div class="text2">
             <h3>{{ item["description"] }}</h3>
@@ -90,6 +130,10 @@
               <span>Price: </span>
               {{ item["price"] }}
               USD
+            </div>
+            <div>
+              <span>Trim: </span>
+              {{ item["trim"] }}
             </div>
             <div>
               <a :href="item['mainUrl']" target="_blank">View Original URL</a>
@@ -121,7 +165,12 @@ const zip = ref(null);
 const trim = ref(null);
 const page = ref(null);
 const carsData = ref([]);
+const sortOrder = ref("asc"); // Declare and initialize sortOrder
+const selection = ref("None");
+const items = ["Mileage", "Price", "None"];
 
+const searchQuery = ref("");
+const filteredCars = ref([]);
 const currentModels = ref([]);
 const currentMakes = ref([]);
 const currentDistances = ref([]);
@@ -147,6 +196,63 @@ const zipCodeRegex =
 function validateZipCode(zipCode) {
   return zipCodeRegex.test(zipCode);
 }
+
+watch(searchQuery, (newQuery) => {
+  filterData(newQuery);
+});
+
+watch(selection, (newSelection) => {
+  sortCars();
+});
+
+const filterData = (query) => {
+  console.log(carsData.value);
+  if (!query) {
+    filteredCars.value = carsData.value;
+  } else {
+    filteredCars.value = carsData.value.filter(
+      (car) =>
+        car["description"].toLowerCase().includes(query.toLowerCase()) ||
+        car.mileage.toString().toLowerCase().includes(query.toLowerCase()) ||
+        car.price.toString().toLowerCase().includes(query.toLowerCase())
+    );
+  }
+};
+
+const sortCars = () => {
+  if (selection.value == "None") {
+    console.log("DONE");
+    filteredCars.value = [...carsData.value];
+    return;
+  }
+
+  filteredCars.value.sort((a, b) => {
+    if (sortOrder.value === "asc") {
+      if (selection.value === "Mileage") {
+        const mileageA = parseInt(a.mileage.replace(/[^0-9]/g, ""));
+        const mileageB = parseInt(b.mileage.replace(/[^0-9]/g, ""));
+        return mileageA - mileageB;
+      }
+      if (selection.value === "Price") {
+        const priceA = parseInt(a.price.replace(/[^0-9]/g, ""));
+        const priceB = parseInt(b.price.replace(/[^0-9]/g, ""));
+        return priceA - priceB;
+      }
+    }
+    if (sortOrder.value === "desc") {
+      if (selection.value === "Mileage") {
+        const mileageA = parseInt(a.mileage.replace(/[^0-9]/g, ""));
+        const mileageB = parseInt(b.mileage.replace(/[^0-9]/g, ""));
+        return mileageB - mileageA;
+      }
+      if (selection.value === "Price") {
+        const priceA = parseInt(a.price.replace(/[^0-9]/g, ""));
+        const priceB = parseInt(b.price.replace(/[^0-9]/g, ""));
+        return priceB - priceA;
+      }
+    }
+  });
+};
 
 const params = reactive({
   make: url.searchParams.get("make"),
@@ -252,12 +358,26 @@ const checkResult = (site, data) => {
       return e;
     }
   });
+  if (count.value == 9) {
+    count.value = 0;
+    loading.value = false;
+  }
+
+  data = data.map((i) => {
+    i.mileage = i.mileage.replace(/[^0-9]/g, "");
+    i.price = i.price.replace(/[^0-9]/g, "");
+    return i;
+  });
   carsData.value = carsData.value.concat(data);
-  //Remove all duplicates from the array
   carsData.value = carsData.value.filter(
     (item, index) => carsData.value.indexOf(item) === index
   );
+
+  filteredCars.value = [...carsData.value];
   carStatus.value.push(site + " : " + data.length + " cars found");
+  setTimeout(() => {
+    carStatus.value.shift();
+  }, 3000);
   console.log(carsData.value);
 };
 
@@ -265,7 +385,7 @@ const getWebData = async (site) => {
   console.log("REQUESTING: " + site);
   try {
     const response = await fetch(
-      "http://localhost:5000/api/cars?website=" + site,
+      "/api/cars?website=" + site,
       {
         method: "POST",
         headers: {
@@ -391,6 +511,30 @@ main {
   max-width: 1200px;
 }
 
+.card3 {
+  margin: 0 auto 0 auto;
+  padding: 20px;
+  background-color: white;
+  box-shadow: none !important;
+  border: 1px solid #ababab;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+}
+
+.search-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 20px;
+  max-width: 1200px;
+}
+
+.searchpadding {
+  margin: 40px auto 0 auto;
+}
 .card2 {
   margin: 0 auto 40px auto;
   padding: 20px;
@@ -400,7 +544,12 @@ main {
   width: 100%;
   max-width: 1200px;
 }
-
+.radiogroup {
+  height: 80px;
+  max-width: 140px;
+}
+.search {
+}
 .text {
   padding-top: 13px;
   height: 70px;
@@ -423,6 +572,10 @@ main {
   align-items: center;
   width: 100%;
   max-width: 1200px;
+}
+
+.sortbyselection {
+  height: 55px;
 }
 
 .single-nav {
@@ -481,13 +634,13 @@ main {
   }
   .card2 .divider {
     flex-direction: column;
-    min-height: 550px;
+    min-height: 650px;
     text-align: center;
     margin: 0;
   }
 
   .card2 img {
-    margin: auto;
+    margin: 0px auto;
   }
 }
 
@@ -500,6 +653,20 @@ main {
       "trim"
       "zip";
     grid-template-columns: 1fr;
+  }
+
+  .search-card {
+    flex-direction: column;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .search-card .v-select {
+    width: 100%;
+  }
+
+  .search {
+    width: 100%;
   }
 }
 

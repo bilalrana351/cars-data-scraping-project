@@ -1,0 +1,98 @@
+[
+    {
+        "imageUrl": "https://static.ed.edmunds-media.com/unversioned/img/e17/no-vehicle-gray-images/no-vehicle-gray-image-suv.svg",
+        "description": "2001 Suzuki Grand Vitara",
+        "mileage": "198,976 miles",
+        "price": "Not Priced",
+        "mainUrl": "https://www.edmunds.com/suzuki/grand-vitara/2001/vin/JS3TD62V114156895/?radius=50",
+        "trim": "JLX  4dr SUV"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/suzuki/sx4/2007/izmo/2007_suzuki_sx4_4dr-hatchback_sport_tds_izmo_5_600x400.jpg",
+        "description": "2007 Suzuki SX4",
+        "mileage": "220,644 miles",
+        "price": "Not Priced",
+        "mainUrl": "https://www.edmunds.com/suzuki/sx4/2007/vin/JS2YB417X75100318/?radius=50",
+        "trim": "Sport  4dr Hatchback"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/for-sale/52-js3td0d79b4100362/img-1-600x400.jpg",
+        "description": "2011 Suzuki Grand Vitara",
+        "mileage": "123,857 miles",
+        "price": "$12,799",
+        "mainUrl": "https://www.edmunds.com/suzuki/grand-vitara/2011/vin/JS3TD0D79B4100362/?radius=50",
+        "trim": "Limited  4dr SUV"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/for-sale/7c-js3td947264104361/img-1-600x400.jpg",
+        "description": "2006 Suzuki Grand Vitara",
+        "mileage": "156,424 miles",
+        "price": "$5,998",
+        "mainUrl": "https://www.edmunds.com/suzuki/grand-vitara/2006/vin/JS3TD947264104361/?radius=50",
+        "trim": "Luxury  4dr SUV"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/for-sale/77-js2yb413275110600/img-1-600x400.jpg",
+        "description": "2007 Suzuki SX4",
+        "mileage": "283,923 miles",
+        "price": "$2,900",
+        "mainUrl": "https://www.edmunds.com/suzuki/sx4/2007/vin/JS2YB413275110600/?radius=50",
+        "trim": ""
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/suzuki/sx4/2010/oem/2010_suzuki_sx4_4dr-hatchback_sportback-gts_fq_oem_2_600x400.jpg",
+        "description": "2010 Suzuki SX4",
+        "mileage": "144,739 miles",
+        "price": "$5,995",
+        "mainUrl": "https://www.edmunds.com/suzuki/sx4/2010/vin/JS2YB5A36A6302609/?radius=50",
+        "trim": "Crossover  4dr Hatchback w/Technology Pkg"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/suzuki/grand-vitara/2003/izmo/2003_suzuki_grand-vitara_4dr-suv_base_tds_izmo_2_600x400.jpg",
+        "description": "2003 Suzuki Grand Vitara",
+        "mileage": "214,899 miles",
+        "price": "$4,997",
+        "mainUrl": "https://www.edmunds.com/suzuki/grand-vitara/2003/vin/JS3TD62V834101492/?radius=50",
+        "trim": "Base  4dr SUV"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/for-sale/12-js3td62v424157167/img-1-600x400.jpg",
+        "description": "2002 Suzuki Grand Vitara",
+        "mileage": "138,693 miles",
+        "price": "$5,999",
+        "mainUrl": "https://www.edmunds.com/suzuki/grand-vitara/2002/vin/JS3TD62V424157167/?radius=50",
+        "trim": "Limited  4dr SUV"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/for-sale/f5-js2ya5a56c6300561/img-1-600x400.jpg",
+        "description": "2012 Suzuki SX4",
+        "mileage": "75,551 miles",
+        "price": "$7,888",
+        "mainUrl": "https://www.edmunds.com/suzuki/sx4/2012/vin/JS2YA5A56C6300561/?radius=50",
+        "trim": "SportBack  4dr Hatchback"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/for-sale/71-js2yb413375102389/img-1-600x400.jpg",
+        "description": "2007 Suzuki SX4",
+        "mileage": "44,600 miles",
+        "price": "$5,998",
+        "mainUrl": "https://www.edmunds.com/suzuki/sx4/2007/vin/JS2YB413375102389/?radius=50",
+        "trim": "Base  4dr Hatchback w/Rally Package"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/for-sale/ea-js3td944764104250/img-1-600x400.jpg",
+        "description": "2006 Suzuki Grand Vitara",
+        "mileage": "150,000 miles",
+        "price": "$4,500",
+        "mainUrl": "https://www.edmunds.com/suzuki/grand-vitara/2006/vin/JS3TD944764104250/?radius=50",
+        "trim": "XSport  4dr SUV"
+    },
+    {
+        "imageUrl": "https://www.edmunds.com/assets/m/for-sale/77-2s3da417786122019/img-1-600x400.jpg",
+        "description": "2008 Suzuki XL7",
+        "mileage": "123,646 miles",
+        "price": "$6,777",
+        "mainUrl": "https://www.edmunds.com/suzuki/xl7/2008/vin/2S3DA417786122019/?radius=50",
+        "trim": "Luxury  4dr SUV w/3rd Row"
+    }
+]

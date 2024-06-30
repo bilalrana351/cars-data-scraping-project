@@ -63,14 +63,13 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     fillUpJsonData(yearMin,yearMax,make,model,trim,zip,radius,pageNumber,initialAddress)
 
-    with open("carbravo.txt","w",encoding="utf-8") as f:
-        f.write(json.dumps(json_data))
-
     # If page does not exist, we will give it the next page token
     if int(pageNumber) not in nextPageTokens:
         nextPageTokens[pageNumber] = nextToken
     
     json_data['pagination']['nextPageToken'] = nextPageTokens[int(pageNumber)]
+
+    print(initialAddress)
 
     # Have to add some logic for the next page id
 
@@ -83,8 +82,12 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     if newRequest:
         maxPages = findTotalRecords(content)
-    
-    info = scrapInfo(content)
+
+    try:
+        info = scrapInfo(content)
+    except Exception as e:
+        print(e)
+        info = []
 
     nextToken = getNextPageToken(content)
 
@@ -119,6 +122,8 @@ def getNextPageToken(content):
 
 def scrapInfo(content):
     info = []
+    if content['data']['hits'] == None:
+        return info
     for data in content['data']['hits']:
         try:
             imageUrl = data["tileImage"]
@@ -140,12 +145,18 @@ def scrapInfo(content):
             mainLink = "https://www.carbravo.com/shopping/inventory/vehicle?vinSlug=" + data["vin"]
         except:
             mainLink = "Link not available"
+        try:
+            trim = data["trim"]
+        except Exception as e:
+            print(e)
+            trim = ""
         info.append({
             "description": description, 
             "price": price, 
             "mileage": mileage, 
             "imageUrl": imageUrl, 
-            "mainUrl": mainLink})
+            "mainUrl": mainLink,
+            "trim": trim})
     return info
 
 def findTotalRecords(content):
@@ -155,7 +166,7 @@ def findTotalRecords(content):
         return 0
 
 def interPretFigures(radius,zip,yearMin,yearMax):
-    if radius == -1 or zip == None:
+    if radius == -1 or zip == None or radius == None:
         radius = 2000
     if zip == None:
         zip = 60601
@@ -205,4 +216,5 @@ def getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim):
     return url
 
 if __name__ == "__main__":
+    scrapCars(1,yearMin=2010,yearMax=2020,make="Honda",zip=60601,newRequest=True)
     raise Exception("File not meant to be run directly")

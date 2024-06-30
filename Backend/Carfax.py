@@ -6,9 +6,16 @@ import json
 
 maxPages = 1
 
+modelGlob = None
+makeGlob = None
+trimGlob = None
+
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
     global maxPages
 
+    modelGlob = model
+    makeGlob = make
+    trimGlob = trim
 
     if pageNumber > maxPages:
         return []
@@ -81,13 +88,33 @@ def scrapInfo(html):
                 pass
     return info
 
+def scrapTrim(card,html):
+    global modelGlob
+    global makeGlob
+    global trimGlob
+    try:
+        description = scrapDescription(card,html)
+        description = description.lower()
+        if modelGlob is not None:
+            # Find out the model from the description by matching and then replace it by an empty string
+            description = description.replace(modelGlob.lower(),"")
+        if makeGlob is not None:
+            description = description.replace(makeGlob.lower(),"")
+        if trimGlob is not None:
+            description = description.replace(trimGlob.lower(),"")
+        description = description.split(" ")[-1].strip()
+    except Exception as e:
+        description = ""
+    return description # However this is not always the case
+
 def scrapCard(card,html):
     info = {
         "imageUrl": scrapImageUrl(card,html),
         "description": scrapDescription(card,html),
         "price": scrapPrice(card,html),
         "mainUrl": scrapMainLink(card),
-        "mileage": scrapMileage(card)
+        "mileage": scrapMileage(card),
+        "trim": scrapTrim(card,html)
     }
 
     return info 
@@ -220,4 +247,5 @@ def getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim):
     return url
 
 if __name__ == "__main__":
+    scrapCars(1,make = "Honda",newRequest=True)
     raise Exception("This file is not meant to be run directly")

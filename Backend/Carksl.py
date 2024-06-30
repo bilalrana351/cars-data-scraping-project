@@ -202,19 +202,25 @@ def scrapInfo(data):
             listing = "https://cars.ksl.com/listing/" + str(item['id'])
         except:
             listing = "listing not found"
+        try:
+            trim = item['trim']
+        except Exception as e:
+            print(e)
+            trim = ""
         info.append({
             'description': description,
             'imageUrl': imageUrl,
             'price': price,
             'mileage': mileage,
-            'mainUrl': listing
+            'mainUrl': listing,
+            "trim": trim
         })
-
+        
     return info
 
 def main():
     # Example usage:
-    print(scrapCars(pageNumber=2,make="Mercedes-Benz",newRequest=True))
+    print(scrapCars(pageNumber=1,make="Mercedes-Benz",newRequest=True))
 
 if __name__ == "__main__":
     main()

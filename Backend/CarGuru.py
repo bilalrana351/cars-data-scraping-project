@@ -42,7 +42,6 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     
     info = scrapInfo(soup,initialAddress)
 
-
     return info
 
 def interPretFigures(radius,zip,yearMin,yearMax):
@@ -200,5 +199,4 @@ def getInitialAddress(pageNumber,yearMin,yearMax,code,trim,zip,radius):
 
 
 if __name__ == "__main__":
-    scrapCars(1,make="honda",newRequest=True)
     raise Exception("This file is not meant to be run as a script")

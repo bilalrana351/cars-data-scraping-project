@@ -38,6 +38,9 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     soup = BeautifulSoup(response.text,'html.parser')
 
+    with open("truecar.html","w") as f:
+        f.write(str(soup))
+
     imagesInfo = findAllImagesUrl(soup)
 
 
@@ -126,13 +129,22 @@ def scrapInfo(html,imagesInfo,lastPage):
       
     return info
 
+def scrapTrim(card):
+    try:
+        trim = card.find("div",{"data-test":"vehicleCardTrim"}).text
+    except Exception as e:
+        print(e)
+        trim = ""
+    return trim
+        
 def scrapCard(card,imagesInfo):
     return {
         "imageUrl": scrapImageUrl(card,imagesInfo),
         "description": scrapDescription(card),
         "price": scrapPrice(card),
         "mainUrl": scrapMainLink(card),
-        "mileage": scrapMileage(card)
+        "mileage": scrapMileage(card),
+        "trim": scrapTrim(card)
     }
 
 def scrapPrice(card):
@@ -235,4 +247,5 @@ def interPretFigures(radius,zip,yearMin,yearMax):
     return [radius,zip,yearMin,yearMax]
     
 if __name__ == '__main__':
+    scrapCars(1,make="Honda",newRequest=True)
     raise Exception("This file is not meant to run by itself")

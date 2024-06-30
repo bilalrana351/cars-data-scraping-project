@@ -99,7 +99,7 @@ def getip():
     return json.dumps({"STATUS":"OK","IP":"http://" + get_ipv4_address() + ":" + str(PORT)})
 
 if __name__ == '__main__':
-    PORT = 5432
+    PORT = 5000
     print("Starting Server......\n")
     print("LOCAL: http://127.0.0.1:" + str(PORT))
     print("GLOBAL: http://" + get_ipv4_address() + ":" + str(PORT))

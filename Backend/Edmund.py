@@ -12,6 +12,9 @@ maxPages = 1
 def scrapCars(pageNumber, yearMin=None, yearMax=None, make=None, model=None, trim=None, zip=None, radius=None, newRequest=False):
     global headers
     global maxPages
+    global makeGlob
+    global modelGlob
+    global trimGlob
 
     if pageNumber > maxPages:
         return []
@@ -69,20 +72,31 @@ def scrapCars(pageNumber, yearMin=None, yearMax=None, make=None, model=None, tri
             'description': listing.find('div', class_='size-16 text-cool-gray-10 font-weight-bold mb-0_5').text.strip() if listing.find('div', class_='size-16 text-cool-gray-10 font-weight-bold mb-0_5') else 'N/A',
             'mileage': listing.find('div', class_='text-gray-darker row').find('span', class_='text-cool-gray-30').text.strip().split()[0] + " miles" if listing.find('div', class_='text-gray-darker row') else '0 miles',
             'price': listing.find('span', class_='heading-3').text.strip() if listing.find('span', class_='heading-3') else 'N/A',
-            'mainUrl': "https://www.edmunds.com" + listing.find('a', class_='usurp-inventory-card-vdp-link')['href'] if listing.find('a', class_='usurp-inventory-card-vdp-link') else 'N/A'
+            'mainUrl': "https://www.edmunds.com" + listing.find('a', class_='usurp-inventory-card-vdp-link')['href'] if listing.find('a', class_='usurp-inventory-card-vdp-link') else 'N/A',
+            'trim': scrapTrim(listing)
         }
         cars.append(car)
 
+    with open("edmund.json", "w") as f:
+        f.write(json.dumps(cars, indent=4))
+
     return cars
+
+def scrapTrim(listing):
+    try:
+        description = listing.find("div",class_ = "font-weight-normal size-14 text-cool-gray-30").text.strip()
+    except Exception as e:
+        print(e)
+        description = ""
+    return description # However this is not always the case
 
 # Example usage:
 def main():
     cars1 = scrapCars(1, yearMin=2010, yearMax=2023, make="Toyota", model="Camry", zip="60601", newRequest=True)
-    cars2 = scrapCars(2, yearMin=2010, yearMax=2023, make="Toyota", model="Camry", zip="60601", newRequest=False)
+    # cars2 = scrapCars(2, yearMin=2010, yearMax=2023, make="Toyota", model="Camry", zip="60601", newRequest=False)
 
     # Output the result as JSON
     output_json = json.dumps(cars1, indent=4)
-    output_json += json.dumps(cars2, indent=4)
     print(output_json)
 
 if __name__ == "__main__":

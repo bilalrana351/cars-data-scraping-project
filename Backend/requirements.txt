@@ -1,9 +1,12 @@
 Flask-Cors==4.0.0
 Flask==3.0.2
 bs4==0.0.2
-beautifulsoup==4.12.3
+beautifulsoup4==4.12.3
 requests==2.31.0
 validators==0.28.3
 zipcodes==1.2.0
 playwright==1.44.0
 waitress==3.0.0
+requests-html==0.10.0
+lxml==5.2.1
+lxml_html_clean==0.1.1

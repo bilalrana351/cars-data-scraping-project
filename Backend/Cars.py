@@ -7,6 +7,7 @@ from Headers import getHeader
 import Helpers
 from playwright.sync_api import sync_playwright
 import urllib
+import json
 
 totalRecords = 0
 totalPages = 1
@@ -29,6 +30,10 @@ headers = {
     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36',
 }
 
+modelGlob = None
+makeGlob = None
+trimGlob = None
+
 
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=-1,newRequest=False):
     global totalRecords
@@ -37,6 +42,10 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     global totalRecords
     global totalPages
     global headers
+
+    modelGlob = model
+    makeGlob = make
+    trimGlob = trim
 
     # If it is a new request we will reset the page number
     if newRequest:
@@ -81,11 +90,14 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
 
     if (finished):
         info = scrapInfo(soup,True)
-        return info,totalPages
+        json.dump(info,open("cars.json","w"))
+        return info
 
     info = scrapInfo(soup,False)
 
-    return info,totalPages
+    json.dump(info,open("cars.json","w"))
+
+    return info
 
 def findTotalRecords(html,model,make,trim):
     if (trim != None):
@@ -174,6 +186,8 @@ def getInitialAddress(pageNumber,yearMin=None,yearMax=None,make=None,model=None,
     return initialAddress
 
 def scrapInfo(html,last):
+    with open("cars.html","w") as file:
+        file.write(str(html))
     recordInfo = []
     vehicleCards = html.find_all('div', class_='vehicle-card ep-theme-hubcap')
     if (last == True):
@@ -188,13 +202,34 @@ def getNoRecordsInLastListing(html):
     global perPageRecords
     return totalRecords - ((totalPages - 1) * perPageRecords)
 
+def findTrim(card):
+    global modelGlob
+    global makeGlob
+    global trimGlob
+    try:
+        description = findDetails(card)
+        if modelGlob is not None:
+        # Find out the model from the description by matching and then replace it by an empty string
+            description = description.replace(modelGlob.lower(),"") 
+        if makeGlob is not None:
+            description = description.replace(makeGlob.lower(),"")
+        if trimGlob is not None:
+            description = description.replace(trimGlob.lower(),"")
+        description = description.split(" ")[-1].strip()
+    except Exception as e:
+        print(e)
+        description = ""
+    return description # However this is not always the case
+
+
 def scrapCard(card):
     imageUrl = findImage(card)
     description = findDetails(card)
     mileage = findMileage(card)
     price = findPrice(card)
+    trim = findTrim(card)
     mainLink = "https://cars.com" + findMainLink(card)
-    return {"imageUrl":imageUrl,"description":description,"mileage":mileage,"price":price,"mainLink":mainLink}
+    return {"imageUrl":imageUrl,"description":description,"mileage":mileage,"price":price,"mainLink":mainLink,"trim":trim}
 
 def findImage(card):
     # Find all the instances of the vehicle Images
@@ -255,4 +290,5 @@ def findMainLink(card):
         return ("Main Link not found")
     
 if __name__ == "__main__":
+    scrapCars(1,make = "Honda", newRequest=True)
     raise Exception("This file is not meant to be run directly")

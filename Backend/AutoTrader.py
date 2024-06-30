@@ -72,6 +72,7 @@ def scrapFromListingCollection(html):
             info.append(extractInformation(data))
         except Exception as e:
             pass
+
     return info
 
 def scrapFromListings(html):
@@ -84,8 +85,55 @@ def scrapFromListings(html):
             info.append(extractInformation(data))
         except:
             pass
-
     return info
+
+def parseTrim(description,data):
+    name = data['brand']['name']
+    model = data['model']
+    year = data['vehicleModelDate']
+    if name.lower() in description.lower():
+        description = description.replace(name,"")
+    if model.lower() in description.lower():
+        description = description.replace(model,"")
+    if str(year) in description:
+        description = description.replace(str(year),"")
+    if "used" in description.lower():
+        description = description.replace("Used","")
+        description = description.replace("used","")
+    if "new" in description.lower():
+        description = description.replace("New","")
+        description = description.replace("new","")
+    if "certified" in description.lower():
+        description = description.replace("Certified","")
+        description = description.replace("certified","")
+    if "pre-owned" in description.lower():
+        description = description.replace("Pre-owned","")
+        description = description.replace("pre-owned","")
+    if "preowned" in description.lower():
+        description = description.replace("Preowned","")
+        description = description.replace("preowned","")
+    if "pre owned" in description.lower():
+        description = description.replace("Pre owned","")
+        description = description.replace("pre owned","")
+    if "w/" in description.lower():
+        description = description.replace("w/","")
+    if "with" in description.lower():
+        description = description.replace("with","")
+    if "W/" in description:
+        description = description.replace("W/","")
+    description = description.strip()
+    return description
+
+def extractTrim(description,data):
+    # I have the format like Used 2019 Honda Accord Sport 1.5T
+    # I need to extract the trim from this
+    try:
+        description = parseTrim(description,data)
+    except Exception as e:
+        return ""
+    return description
+
+    
 
 def extractInformation(data):
     totalList = {}
@@ -93,6 +141,10 @@ def extractInformation(data):
         totalList['description'] = data['name']
     except:
         totalList['description'] = 'Description not found'
+    try:
+        totalList['trim'] = extractTrim(totalList['description'],data)
+    except:
+        totalList['trim'] = ""
     try:
         totalList['price'] = data['offers']['price']
     except:
