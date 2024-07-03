@@ -38,6 +38,15 @@
               v-model="model"
             ></v-autocomplete>
           </v-responsive>
+          <v-responsive class="text" id="zip">
+            <v-text-field
+              label="Zip"
+              variant="outlined"
+              v-model="zip"
+              type="number"
+              color="red darken 3"
+            ></v-text-field>
+          </v-responsive>
           <v-responsive class="text" id="distance">
             <v-autocomplete
               label="Distance"
@@ -52,15 +61,6 @@
               label="trim"
               variant="outlined"
               v-model="trim"
-              color="red darken 3"
-            ></v-text-field>
-          </v-responsive>
-          <v-responsive class="text" id="zip">
-            <v-text-field
-              label="Zip"
-              variant="outlined"
-              v-model="zip"
-              type="number"
               color="red darken 3"
             ></v-text-field>
           </v-responsive>
@@ -229,25 +229,25 @@ const sortCars = () => {
   filteredCars.value.sort((a, b) => {
     if (sortOrder.value === "asc") {
       if (selection.value === "Mileage") {
-        const mileageA = parseInt(a.mileage.replace(/[^0-9]/g, ""));
-        const mileageB = parseInt(b.mileage.replace(/[^0-9]/g, ""));
+        const mileageA = parseFloat(a.mileage.replace(/[^0-9.]/g, ""));
+        const mileageB = parseFloat(b.mileage.replace(/[^0-9.]/g, ""));
         return mileageA - mileageB;
       }
       if (selection.value === "Price") {
-        const priceA = parseInt(a.price.replace(/[^0-9]/g, ""));
-        const priceB = parseInt(b.price.replace(/[^0-9]/g, ""));
+        const priceA = parseFloat(a.price.replace(/[^0-9.]/g, ""));
+        const priceB = parseFloat(b.price.replace(/[^0-9.]/g, ""));
         return priceA - priceB;
       }
     }
     if (sortOrder.value === "desc") {
       if (selection.value === "Mileage") {
-        const mileageA = parseInt(a.mileage.replace(/[^0-9]/g, ""));
-        const mileageB = parseInt(b.mileage.replace(/[^0-9]/g, ""));
+        const mileageA = parseFloat(a.mileage.replace(/[^0-9.]/g, ""));
+        const mileageB = parseFloat(b.mileage.replace(/[^0-9.]/g, ""));
         return mileageB - mileageA;
       }
       if (selection.value === "Price") {
-        const priceA = parseInt(a.price.replace(/[^0-9]/g, ""));
-        const priceB = parseInt(b.price.replace(/[^0-9]/g, ""));
+        const priceA = parseFloat(a.price.replace(/[^0-9.]/g, ""));
+        const priceB = parseFloat(b.price.replace(/[^0-9.]/g, ""));
         return priceB - priceA;
       }
     }
@@ -364,8 +364,8 @@ const checkResult = (site, data) => {
   }
 
   data = data.map((i) => {
-    i.mileage = i.mileage.replace(/[^0-9]/g, "");
-    i.price = i.price.replace(/[^0-9]/g, "");
+    i.mileage = i.mileage.replace(/[^0-9.]/g, "");
+    i.price = i.price.replace(/[^0-9.]/g, "");
     return i;
   });
   carsData.value = carsData.value.concat(data);
@@ -384,23 +384,20 @@ const checkResult = (site, data) => {
 const getWebData = async (site) => {
   console.log("REQUESTING: " + site);
   try {
-    const response = await fetch(
-      "/api/cars?website=" + site,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          make: make.value,
-          model: model.value,
-          distance: distance.value,
-          zip: zip.value,
-          trim: trim.value,
-          page: Number(page.value),
-        }),
-      }
-    );
+    const response = await fetch("/api/cars?website=" + site, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        make: make.value,
+        model: model.value,
+        distance: distance.value,
+        zip: zip.value,
+        trim: trim.value,
+        page: Number(page.value),
+      }),
+    });
     const data = await response.json();
     console.log(data);
     console.log("DATA RECIEVED: " + site);
@@ -600,7 +597,7 @@ main {
 .grid-filter {
   display: grid;
   gap: 8px 20px;
-  grid-template-areas: "make model distance trim zip";
+  grid-template-areas: "make model zip distance trim";
   grid-template-columns: repeat(5, 1fr);
 }
 
@@ -629,7 +626,7 @@ main {
   .grid-filter {
     grid-template-areas:
       "make model model"
-      "distance trim zip";
+      "zip distance trim";
     grid-template-columns: repeat(3, 1fr);
   }
   .card2 .divider {
@@ -649,9 +646,9 @@ main {
     grid-template-areas:
       "make"
       "model"
+      "zip"
       "distance"
-      "trim"
-      "zip";
+      "trim";
     grid-template-columns: 1fr;
   }
 
