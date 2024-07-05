@@ -64,6 +64,15 @@
               color="red darken 3"
             ></v-text-field>
           </v-responsive>
+          <v-responsive class="text" id="year">
+            <v-text-field
+              type="number"
+              label="year"
+              variant="outlined"
+              v-model="year"
+              color="red darken 3"
+            ></v-text-field>
+          </v-responsive>
         </div>
       </v-card>
       <div v-if="!loading" class="searchpadding">
@@ -128,7 +137,7 @@
             </div>
             <div>
               <span>Price: </span>
-              {{ item["price"] }}
+              {{ formatPrice(item["price"]) }}
               USD
             </div>
             <div>
@@ -163,6 +172,7 @@ const model = ref(null);
 const distance = ref(null);
 const zip = ref(null);
 const trim = ref(null);
+const year = ref(null);
 const page = ref(null);
 const carsData = ref([]);
 const sortOrder = ref("asc"); // Declare and initialize sortOrder
@@ -197,6 +207,10 @@ function validateZipCode(zipCode) {
   return zipCodeRegex.test(zipCode);
 }
 
+function formatPrice(price) {
+  return parseFloat(price).toLocaleString("en-US");
+}
+
 watch(searchQuery, (newQuery) => {
   filterData(newQuery);
 });
@@ -229,8 +243,8 @@ const sortCars = () => {
   filteredCars.value.sort((a, b) => {
     if (sortOrder.value === "asc") {
       if (selection.value === "Mileage") {
-        const mileageA = parseFloat(a.mileage.replace(/[^0-9.]/g, ""));
-        const mileageB = parseFloat(b.mileage.replace(/[^0-9.]/g, ""));
+        const mileageA = parseFloat(a.mileage.match(/[0-9]*\.?[0-9]+/)[0]);
+        const mileageB = parseFloat(b.mileage.match(/[0-9]*\.?[0-9]+/)[0]);
         return mileageA - mileageB;
       }
       if (selection.value === "Price") {
@@ -261,6 +275,7 @@ const params = reactive({
   trim: url.searchParams.get("trim"),
   zip: url.searchParams.get("zip"),
   page: url.searchParams.get("page"),
+  year: url.searchParams.get("year"),
 });
 
 watch(make, (value) => {
@@ -345,6 +360,12 @@ onMounted(() => {
     page.value = 1;
   }
 
+  if (params.year) {
+    year.value = params.year;
+  } else {
+    year.value = null;
+  }
+
   scrapeCars();
 });
 
@@ -363,11 +384,14 @@ const checkResult = (site, data) => {
     loading.value = false;
   }
 
-  data = data.map((i) => {
-    i.mileage = i.mileage.replace(/[^0-9.]/g, "");
-    i.price = i.price.replace(/[^0-9.]/g, "");
-    return i;
-  });
+  for (let i = 0; i < data.length; i++) {
+    if (typeof data[i].mileage != "string")
+      data[i].mileage = data[i].mileage.toString();
+    if (typeof data[i].price != "string")
+      data[i].price = data[i].price.toString();
+    data[i].mileage = data[i].mileage.replace(/[^0-9.]/g, "");
+    data[i].price = data[i].price.replace(/[^0-9.]/g, "");
+  }
   carsData.value = carsData.value.concat(data);
   carsData.value = carsData.value.filter(
     (item, index) => carsData.value.indexOf(item) === index
@@ -378,7 +402,6 @@ const checkResult = (site, data) => {
   setTimeout(() => {
     carStatus.value.shift();
   }, 3000);
-  console.log(carsData.value);
 };
 
 const getWebData = async (site) => {
@@ -396,14 +419,16 @@ const getWebData = async (site) => {
         zip: zip.value,
         trim: trim.value,
         page: Number(page.value),
+        year: year.value,
       }),
     });
     const data = await response.json();
     console.log(data);
     console.log("DATA RECIEVED: " + site);
     checkResult(site, data.data);
-  } catch {
+  } catch (e) {
     console.log("DATA ERROR: " + site);
+    console.log(e);
     checkResult(site, []);
   }
 };
@@ -462,6 +487,11 @@ const fetchCars = () => {
     newUrl.searchParams.set("page", page.value);
   } else {
     newUrl.searchParams.delete("page");
+  }
+  if (year.value) {
+    newUrl.searchParams.set("year", year.value);
+  } else {
+    newUrl.searchParams.delete("year");
   }
 
   window.history.pushState({}, "", newUrl);
@@ -597,13 +627,12 @@ main {
 .grid-filter {
   display: grid;
   gap: 8px 20px;
-  grid-template-areas: "make model zip distance trim";
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-areas: "make model zip distance trim year";
+  grid-template-columns: repeat(6, 1fr);
 }
 
 #make {
   grid-area: make;
-  flex-grow: 1;
 }
 
 #model {
@@ -622,11 +651,15 @@ main {
   grid-area: trim;
 }
 
+#year {
+  grid-area: year;
+}
+
 @media (max-width: 1000px) {
   .grid-filter {
     grid-template-areas:
-      "make model model"
-      "zip distance trim";
+      "make model zip"
+      "distance trim year";
     grid-template-columns: repeat(3, 1fr);
   }
   .card2 .divider {
@@ -648,7 +681,8 @@ main {
       "model"
       "zip"
       "distance"
-      "trim";
+      "trim"
+      "year";
     grid-template-columns: 1fr;
   }
 

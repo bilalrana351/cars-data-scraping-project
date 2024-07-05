@@ -83,7 +83,8 @@ def scrapInfo(html):
             try:
                 infoScraped = scrapCard(listing,html)
                 # We will append to the info array
-                info.append(infoScraped)
+                if infoScraped is not None:
+                    info.append(infoScraped)
             except Exception as e:
                 pass
     return info
@@ -108,6 +109,7 @@ def scrapTrim(card,html):
     return description # However this is not always the case
 
 def scrapCard(card,html):
+    global makeGlob
     info = {
         "imageUrl": scrapImageUrl(card,html),
         "description": scrapDescription(card,html),
@@ -116,6 +118,9 @@ def scrapCard(card,html):
         "mileage": scrapMileage(card),
         "trim": scrapTrim(card,html)
     }
+
+    if makeGlob.lower() not in info["description"].lower():
+        return None
 
     return info 
 
@@ -247,5 +252,4 @@ def getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim):
     return url
 
 if __name__ == "__main__":
-    scrapCars(1,make = "Honda",newRequest=True)
     raise Exception("This file is not meant to be run directly")

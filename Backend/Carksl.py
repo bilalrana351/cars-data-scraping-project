@@ -4,8 +4,13 @@ import requests
 
 maxPages = 3
 
+makeGlob = None
+
 def scrapCars(pageNumber, yearMin=None, yearMax=None, make=None, model=None, trim=None, zip=None, radius=None, newRequest=False):
     global maxPages
+    global makeGlob
+
+    makeGlob = make
 
     if pageNumber > maxPages:
         return []
@@ -62,6 +67,8 @@ def makeBaseUrl(make, model, trim, yearMin, yearMax, zip, radius, pageNumber):
         base_url += f"/zip/{zip}"
     if radius is not None:
         base_url += f"/miles/{radius}"
+
+    print(base_url)
     
     return base_url
 
@@ -90,7 +97,6 @@ def getJsonData(initialUrl, pageNumber, make, model, yearFrom, yearTo, trim=None
     params = ''
 
     body = constructBody(make, model, yearFrom, yearTo, trim, zip, radius, pageNumber)
-
 
 
     json_data = {
@@ -166,12 +172,15 @@ def constructBody(make, model, yearFrom, yearTo, trim, zip, radius, pageNumber):
     if radius is not None:
         body.append('miles')
         body.append(radius)
-    body.append('pageNumber')
-    body.append(pageNumber)
+    else:
+        body.append('miles')
+        body.append(2000)
 
     return body
 
 def scrapInfo(data):
+    global makeGlob
+
     info = []
     items = data["data"]["items"]
     for item in items:
@@ -207,6 +216,9 @@ def scrapInfo(data):
         except Exception as e:
             print(e)
             trim = ""
+        if makeGlob.lower() not in description.lower():
+            continue
+        
         info.append({
             'description': description,
             'imageUrl': imageUrl,
@@ -222,5 +234,6 @@ def main():
     # Example usage:
     print(scrapCars(pageNumber=1,make="Mercedes-Benz",newRequest=True))
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     main()
+    

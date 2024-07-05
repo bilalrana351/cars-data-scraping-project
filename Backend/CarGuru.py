@@ -16,12 +16,17 @@ headers = {
     "Upgrade-Insecure-Requests":"1"
 }
 
+makeGlob = None
+
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
     global maxPages
     global headers
+    global makeGlob
 
     if pageNumber > maxPages:
         return []
+    
+    makeGlob = make
     
     radius,zip,yearMin,yearMax = interPretFigures(radius,zip,yearMin,yearMax)
 
@@ -100,7 +105,9 @@ def scrapInfo(html,url):
     ldJson = ldJson["offers"]
 
     for car in ldJson:
-        info.append(scrapFromJson(car,url))
+        infoFromJson = scrapFromJson(car,url)
+        if infoFromJson is not None:
+            info.append(infoFromJson)
 
     return info
 
@@ -126,6 +133,10 @@ def scrapFromJson(car,url):
         mileage = car['itemOffered']['mileageFromOdometer']['value']
     except Exception as e:
         mileage = "Mileage not found"
+    
+    if makeGlob.lower() not in description.lower():
+        return None
+
     return {
         "imageUrl": imageUrl,
         "description": description,
@@ -137,7 +148,7 @@ def scrapFromJson(car,url):
 def findOutInitialCode(make,model):
     if model is None:
         # Lets load the makes car guru file
-        with open("makesValuesCarGuru.txt","r") as f:
+        with open("Backend\\makesValuesCarGuru.txt","r") as f:
             makes = {}
             try:
                 makes = json.loads(f.read())

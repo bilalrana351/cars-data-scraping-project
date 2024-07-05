@@ -12,10 +12,15 @@ recordsInAPage = 30
 
 maxPages = 1
 
+makeGlob = None
+
 # This site gives a maximum of 30 records per page
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
     global recordsInAPage
     global maxPages
+    global makeGlob
+
+    makeGlob = make
 
     # If it is a new request we will reset the page number
     if newRequest:
@@ -125,7 +130,8 @@ def scrapInfo(html,imagesInfo,lastPage):
           continue
       infoScraped = scrapCard(listing,imagesInfo)
       # We will append to the info array
-      info.append(infoScraped)
+      if infoScraped is not None:
+        info.append(infoScraped)
       
     return info
 
@@ -138,7 +144,8 @@ def scrapTrim(card):
     return trim
         
 def scrapCard(card,imagesInfo):
-    return {
+    global makeGlob
+    info = {
         "imageUrl": scrapImageUrl(card,imagesInfo),
         "description": scrapDescription(card),
         "price": scrapPrice(card),
@@ -146,6 +153,11 @@ def scrapCard(card,imagesInfo):
         "mileage": scrapMileage(card),
         "trim": scrapTrim(card)
     }
+
+    if makeGlob.lower() not in info["description"].lower():
+        return None
+
+    return info
 
 def scrapPrice(card):
     try:
@@ -165,9 +177,9 @@ def scrapImageUrl(card,imagesInfo):
     try:
         # Find the id of the card
         idDiv = card.find("div",class_="relative rounded-md shadow-lg")
-        id = idDiv['data-test-item']
+        id_ = idDiv['data-test-item']
         for info in imagesInfo:
-            if (id == info["vehicle"]["vin"]):
+            if (id_ == info["vehicle"]["vin"]):
                 return "https://listings-prod.tcimg.net/" + info["galleryImages:{}"]["nodes"][0]["url"] + "-cr-540.jpg"
     except Exception as e:
         return "Image not found"
@@ -247,5 +259,4 @@ def interPretFigures(radius,zip,yearMin,yearMax):
     return [radius,zip,yearMin,yearMax]
     
 if __name__ == '__main__':
-    scrapCars(1,make="Honda",newRequest=True)
     raise Exception("This file is not meant to run by itself")

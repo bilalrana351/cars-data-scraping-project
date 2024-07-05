@@ -42,6 +42,7 @@ def cars():
         model = None
         distance = None
         zip = None
+        year = None
         trim = None
         page = "1"
 
@@ -63,26 +64,34 @@ def cars():
             trim = body["trim"]
         if "page" in body:
             page = body["page"]
+        if "year" in body:
+            year = body["year"]
+            try:
+                year = int(year)
+            except:
+                year = None
+            if year == "":
+                year = None
 
         x = []
         if website == "autotrader":
-            x = AutoTrader.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False)
+            x = AutoTrader.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False, yearMax=year, yearMin=year)
         if website == "carbravo":
-            x = CarBravo.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False)
+            x = CarBravo.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False, yearMax=year, yearMin=year)
         if website == "carfax":
-            x = Carfax.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False)
+            x = Carfax.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False, yearMax=year, yearMin=year)
         if website == "carguru":
-            x = CarGuru.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False)
+            x = CarGuru.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False, yearMax=year, yearMin=year)
         if website == "carksl":
-            x = Carksl.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False)
+            x = Carksl.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False, yearMax=year, yearMin=year)
         if website == "carmax":
-            x = Carmax.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False)
+            x = Carmax.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False, yearMax=year, yearMin=year)
         if website == "cars":
-            x = Cars.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False)
+            x = Cars.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False, yearMax=year, yearMin=year)
         if website == "edmund":
-            x = Edmund.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False)
+            x = Edmund.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False, yearMax=year, yearMin=year)
         if website == "truecar":
-            x = TrueCar.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False)
+            x = TrueCar.scrapCars(page,make=make,model=model,trim=trim,zip=zip,radius=distance, newRequest=False, yearMax=year, yearMin=year)
         
         return jsonify({"status": 200, "message": "Data Recieved!", "data":x})
     except Exception as e:

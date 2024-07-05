@@ -42,6 +42,9 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     global totalRecords
     global totalPages
     global headers
+    global modelGlob
+    global makeGlob
+    global trimGlob
 
     modelGlob = model
     makeGlob = make
@@ -91,13 +94,13 @@ def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=Non
     if (finished):
         info = scrapInfo(soup,True)
         json.dump(info,open("cars.json","w"))
-        return info
+        return info,totalPages
 
     info = scrapInfo(soup,False)
 
     json.dump(info,open("cars.json","w"))
 
-    return info
+    return info,totalPages
 
 def findTotalRecords(html,model,make,trim):
     if (trim != None):
@@ -193,7 +196,9 @@ def scrapInfo(html,last):
     if (last == True):
         vehicleCards = vehicleCards[0:getNoRecordsInLastListing(html)]
     for vehicleCard in vehicleCards:
-        recordInfo.append(scrapCard(vehicleCard))
+        infoFromCard = scrapCard(vehicleCard)
+        if infoFromCard is not None:
+            recordInfo.append(infoFromCard)
     return recordInfo
 
 def getNoRecordsInLastListing(html):
@@ -223,12 +228,15 @@ def findTrim(card):
 
 
 def scrapCard(card):
+    global makeGlob
     imageUrl = findImage(card)
     description = findDetails(card)
     mileage = findMileage(card)
     price = findPrice(card)
     trim = findTrim(card)
     mainLink = "https://cars.com" + findMainLink(card)
+    if makeGlob.lower() not in description.lower():
+        return None
     return {"imageUrl":imageUrl,"description":description,"mileage":mileage,"price":price,"mainLink":mainLink,"trim":trim}
 
 def findImage(card):
@@ -289,6 +297,5 @@ def findMainLink(card):
     except:
         return ("Main Link not found")
     
-if __name__ == "__main__":
-    scrapCars(1,make = "Honda", newRequest=True)
+if __name__ == "__main__":  
     raise Exception("This file is not meant to be run directly")

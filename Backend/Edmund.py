@@ -9,12 +9,14 @@ headers = {
 
 maxPages = 1
 
+makeGlob = None
+
 def scrapCars(pageNumber, yearMin=None, yearMax=None, make=None, model=None, trim=None, zip=None, radius=None, newRequest=False):
     global headers
     global maxPages
     global makeGlob
-    global modelGlob
-    global trimGlob
+
+    makeGlob = make
 
     if pageNumber > maxPages:
         return []
@@ -75,6 +77,8 @@ def scrapCars(pageNumber, yearMin=None, yearMax=None, make=None, model=None, tri
             'mainUrl': "https://www.edmunds.com" + listing.find('a', class_='usurp-inventory-card-vdp-link')['href'] if listing.find('a', class_='usurp-inventory-card-vdp-link') else 'N/A',
             'trim': scrapTrim(listing)
         }
+        if makeGlob.lower() not in car['description'].lower():
+            continue
         cars.append(car)
 
     with open("edmund.json", "w") as f:

@@ -141,6 +141,4 @@ def scrapInfo(content):
     return info
 
 if __name__ == "__main__":
-    info = scrapCars(1,make="Toyota",radius=100)
-    json.dump(info,open("Carmax.json","w"))
     raise Exception("This file is not meant to run")

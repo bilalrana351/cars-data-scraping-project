@@ -22,9 +22,14 @@ searchRadius = 0 # For Nationwide search
 
 maxPages = 1
 
+makeGlob = None
+
 
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
     global maxPages
+    global makeGlob
+
+    makeGlob = make
 
     if pageNumber > maxPages:
         return []
@@ -65,6 +70,7 @@ def scrapFromListingCollection(html):
     info = []
     appData = html.find("script",{"data-cmp":"listingsCollectionSchema","type":"application/ld+json"})
     appData = json.loads(appData.text)
+
     appData = appData['about']['offers']['itemOffered']
 
     for data in appData:
@@ -78,11 +84,12 @@ def scrapFromListingCollection(html):
 def scrapFromListings(html):
     info = []
     allListings = html.find_all("script",{"data-cmp":"lstgSchema","type":"application/ld+json"})
-    
     for listing in allListings:
         try:
             data = json.loads(listing.text)
-            info.append(extractInformation(data))
+            obtainedInfo = extractInformation(data)
+            if obtainedInfo is not None:
+                info.append(obtainedInfo)
         except:
             pass
     return info
@@ -137,6 +144,7 @@ def extractTrim(description,data):
 
 def extractInformation(data):
     totalList = {}
+    global makeGlob
     try:
         totalList['description'] = data['name']
     except:
@@ -161,6 +169,8 @@ def extractInformation(data):
         totalList['mainUrl'] = data['url']
     except:
         totalList['mainUrl'] = "Link not found"
+    if makeGlob.lower() not in totalList['description'].lower():
+        return None
     return totalList
 
 
@@ -239,5 +249,5 @@ def getInitialAddress(yearMin,yearMax,make,model,trim,zip,zipNo,radius,newSearch
         url += "zip=" + "60601"
     return url
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     raise Exception("This file is not meant to be run directly")

@@ -6,8 +6,6 @@ import time
 
 import json
 
-from playwright.sync_api import sync_playwright
-
 headers = {
     'accept': 'application/json, text/plain, */*',
     'accept-language': 'en-US,en;q=0.9',
@@ -45,12 +43,17 @@ maxPages = 1
 # These will be the next page ids that we will use to get the next page
 nextPageTokens = {}
 
+makeGlob = None
+
 def scrapCars(pageNumber,yearMin=None,yearMax=None,make=None,model=None,trim=None,zip=None,radius=None,newRequest=False):
     global maxPages
     global json_data
     global headers
     global nextToken
     global nextPageTokens
+    global makeGlob
+
+    makeGlob = make
 
     if pageNumber > maxPages:
         return []
@@ -122,6 +125,8 @@ def getNextPageToken(content):
 
 def scrapInfo(content):
     info = []
+    global makeGlob
+
     if content['data']['hits'] == None:
         return info
     for data in content['data']['hits']:
@@ -150,6 +155,8 @@ def scrapInfo(content):
         except Exception as e:
             print(e)
             trim = ""
+        if makeGlob.lower() not in description.lower():
+            continue
         info.append({
             "description": description, 
             "price": price, 
@@ -216,5 +223,4 @@ def getInitialAddress(pageNumber,yearMin,yearMax,make,model,zip,radius,trim):
     return url
 
 if __name__ == "__main__":
-    scrapCars(1,yearMin=2010,yearMax=2020,make="Honda",zip=60601,newRequest=True)
     raise Exception("File not meant to be run directly")
